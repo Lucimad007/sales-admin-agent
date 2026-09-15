@@ -11,3 +11,5 @@ Live product captures. Architecture boards live next to the **root** `README.md`
 | `pipeline.png` | Desktop Kanban |
 | `customers.png` | Customer table |
 | `tally.png` | Customer genUI card |
+| `tally-approve-customer.png` | HITL create customer |
+| `tally-approve-sale.png` | HITL create sale |

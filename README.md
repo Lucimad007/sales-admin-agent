@@ -57,6 +57,12 @@ Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions
 
 ![Customers + Tally genUI](docs/screenshots/tally.png)
 
+Writes pause on a **ConfirmAction** card until you Approve or Reject (LangGraph `interrupt()`). Nothing hits Nest until then.
+
+![Tally approve create customer](docs/screenshots/tally-approve-customer.png)
+
+![Tally approve create sale](docs/screenshots/tally-approve-sale.png)
+
 - Dashboard KPIs; **revenue = completed only**  
 - Customers / sales CRUD  
 - Pipeline: drag on desktop, stage + Move-to on mobile; **cancelled off the board**  
