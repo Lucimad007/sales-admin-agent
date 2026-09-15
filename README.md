@@ -1,21 +1,77 @@
 # Ledger
 
-Sales admin panel for managing customers and sales, plus Tally, a LangGraph sales desk. Monorepo: Next.js UI, NestJS API, Drizzle/Postgres, Python agent.
+Internal **sales admin** (customers, deals, pipeline) plus **Tally** — a LangGraph sales desk that answers from live CRM data and renders **generative UI**, not markdown dumps.
 
-Specs in [`specs/`](./specs) are the source of truth.
+Take-home built as a real product: typed contracts, Nest-owned invariants, first-party auth, HITL writes.
 
-## Stack
+![Dashboard with Tally](docs/screenshots/dashboard.png)
 
-- TypeScript, React, Next.js, NestJS
-- PostgreSQL 16, Drizzle ORM
-- TanStack Query, Tailwind CSS, shadcn/ui primitives
-- Python LangGraph agent **Tally** (tools, checkpoint memory, generative UI)
+## Keywords
 
-## Quick start
+`TypeScript` · `React` · `Next.js 15` · `NestJS` · `Zod` · `Drizzle ORM` · `PostgreSQL` · `TanStack Query` · `Tailwind CSS` · `pnpm` · `Turborepo` · `Python` · `FastAPI` · `LangGraph` · `LangChain` · `generative UI` · `SSE` · `httpOnly JWT` · `human-in-the-loop` · `Kanban` · `dnd-kit`
 
-Requires Node 20+, pnpm 9, Docker, and (for Tally) Python 3.12 + [uv](https://docs.astral.sh/uv/).
+## Tech stack
 
-Postgres is published on **localhost:55432** so it does not collide with other local Postgres instances.
+| Layer | |
+| --- | --- |
+| Web | Next.js App Router, React 19, TanStack Query, Tailwind, shadcn primitives restyled |
+| API | NestJS, Zod DTOs, JWT in httpOnly cookie |
+| Data | Postgres 16, Drizzle (`numeric` prices as strings) |
+| Agent | FastAPI + LangGraph, DeepSeek via OpenCode Go |
+| Repo | pnpm workspaces, Turborepo |
+
+## Architecture
+
+![Runtime architecture](docs/screenshots/architecture.png)
+
+Browser talks only to Next (`:3000`). `/api/*` **rewrites** to Nest (`:3001`) so the session cookie is first-party. Tally (`:8100`) is never called from the browser.
+
+![pnpm Turborepo map](docs/screenshots/monorepo.png)
+
+| Path | Role |
+| --- | --- |
+| `apps/web` | UI |
+| `apps/api` | REST + agent proxy |
+| `apps/agent` | LangGraph |
+| `packages/db` | schema, migrations, seed |
+| `packages/shared` | Zod shared by web + api |
+
+![Tally trust boundary](docs/screenshots/tally-boundary.png)
+
+1. `POST /api/agent/chat` with cookie  
+2. Nest verifies JWT, proxies **SSE** with `AGENT_INTERNAL_TOKEN`  
+3. Tools call Nest HTTP (`X-Acting-User-Id`) — **no CRM SQL in the graph**  
+4. Writes `interrupt()` until Approve  
+
+Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions.md](./specs/decisions.md)
+
+## Product
+
+![Login](docs/screenshots/login.png)
+
+![Pipeline Kanban](docs/screenshots/pipeline.png)
+
+![Customers + Tally genUI](docs/screenshots/tally.png)
+
+- Dashboard KPIs; **revenue = completed only**  
+- Customers / sales CRUD  
+- Pipeline: drag on desktop, stage + Move-to on mobile; **cancelled off the board**  
+- Tally: tools, Postgres checkpointer, long-term `agent_memories`, closed genUI catalog  
+
+![GenUI catalog](docs/screenshots/genui-catalog.png)
+
+`KpiStrip` · `CustomerCard` · `CustomerList` · `SalesTable` · `PipelineSummary` · `ConfirmAction` — **one data widget per turn**
+
+## Decisions I would defend in interview
+
+- Cookie JWT + rewrite, not tokens in `localStorage`  
+- Invariants in Nest services; graph routes and renders  
+- HITL for mutations (`interrupt`)  
+- Closed genUI library (not free-form model HTML)  
+
+## Run
+
+Node 20+, pnpm 9, Docker. Postgres on **localhost:55432**.
 
 ```bash
 cp .env.example .env
@@ -26,63 +82,15 @@ pnpm db:seed
 pnpm dev
 ```
 
-In another terminal, start Tally (optional):
+[http://localhost:3000](http://localhost:3000) — `leo.a@example.org` / `demo1234`
 
-```bash
-cd apps/agent
-uv sync
-uv run uvicorn agent.main:app --reload --port 8100 --app-dir src
-```
+Tally needs `OPENCODE_GO_API_KEY`. CRUD works without it.
 
-Open [http://localhost:3000](http://localhost:3000).
-
-Demo login (seeded, local only):
-
-- email: `leo.a@example.org`
-- password: `demo1234`
-
-Set `OPENCODE_GO_API_KEY` in `.env` for Tally (OpenCode Go → DeepSeek V4.1 Flash). CRUD works without it.
-
-OpenCode uses the same gateway. Run `opencode`, then `/connect` → **OpenCode Go**, paste the key. Default model is `opencode-go/deepseek-v4.1-flash` via [`opencode.json`](./opencode.json).
-
-## Scripts
-
-| Command | What |
+| | |
 | --- | --- |
-| `pnpm dev` | Next `:3000` and Nest `:3001` |
-| `pnpm db:migrate` | Apply SQL in `packages/db/drizzle` |
-| `pnpm db:seed` | Demo user, 12 customers, 24 sales |
-| `pnpm test` | API + agent tests |
-| `pnpm lint` | Typecheck |
+| `pnpm test` | API + agent |
+| `pnpm lint` | typecheck |
 
-## Architecture
+## Built with
 
-Browser → Next.js (rewrites `/api/*`) → NestJS. Tally is never called from the browser. Nest authenticates the cookie, then proxies SSE to the Python service with `AGENT_INTERNAL_TOKEN`. Agent tools call Nest HTTP so CRM rules stay in services.
-
-See [specs/architecture.md](./specs/architecture.md) and [specs/decisions.md](./specs/decisions.md).
-
-## Agent
-
-- Tools: dashboard, customers, sales, pipeline, plus write tools with LangGraph `interrupt()` confirmation
-- Short-term memory: Postgres checkpointer (`langgraph` schema)
-- Long-term memory: `agent_memories` via `POST /api/agent/memories`
-- GenUI parts: `KpiStrip`, `CustomerCard`, `CustomerList`, `SalesTable`, `PipelineSummary`, `ConfirmAction`, `Markdown` (one data widget per turn)
-
-## AI tools used
-
-- **Cursor (Grok 4.6)** — scaffolding the monorepo, Nest modules, Next.js UI, LangGraph graph, specs, and wiring
-- **Human direction** — product brief (PDF), Python LangGraph + genUI/memory/tools, design tokens, ADRs
-
-I reviewed and adjusted auth (httpOnly cookie + rewrite), revenue definition (completed only), Kanban (cancelled off-board), and tool HTTP boundaries so the graph does not own CRM invariants.
-
-## Screenshots
-
-Run locally, then capture:
-
-1. Login
-2. Dashboard KPIs
-3. Customers table
-4. Pipeline Kanban
-5. Tally rail with a genUI card
-
-Place files in `docs/screenshots/` if you attach them to a submission.
+Cursor for scaffolding and iteration. I owned auth boundary, revenue definition, Kanban rules, tool HTTP, genUI discipline, and the Ledger visual system.
