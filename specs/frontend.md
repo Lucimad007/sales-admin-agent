@@ -41,7 +41,7 @@ Customer and sale create/edit in dialogs on list pages; detail pages allow edit 
 
 - Persistent thread per user (server-side `thread:{userId}`)
 - Stream tokens into the last assistant message
-- Render `ui` parts with a registry. One data widget per turn (`CustomerCard` / `CustomerList` / `SalesTable` / `KpiStrip` / `PipelineSummary`); records are cards/tables, not markdown dumps.
+- Render `ui` parts with a closed registry (OpenUI-style library, not free-form model HTML). One data widget per turn. Widgets match Ledger: KPI trio, identity customer cards, headed lists, pipeline bars.
 - `interrupt` shows `ConfirmAction`; Approve calls resume `approve`, Reject calls `reject`
 - Health query: if `llm` is false, show setup empty state instead of the composer being “broken”
 - First open seeds a Tally welcome message plus clickable “Try asking” prompts (revenue, pipeline, customers, open deals). ⌘K focuses the composer.

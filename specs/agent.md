@@ -75,7 +75,7 @@ Every part: `{ "id": string, "type": string, "props": object }`.
 
 Zod schemas live in `packages/shared`. Python emits the same JSON shapes.
 
-`render` maps **this turn's** tool messages only (after the last human message), then keeps **one** data widget (plus `ConfirmAction` if present). Extra KPIs/pipeline/cards from leftover tool calls are dropped.
+`render` maps **this turn's** tool messages only (after the last human message), then keeps **one** data widget (plus `ConfirmAction` if present). Extra KPIs/pipeline/cards from leftover tool calls are dropped. The web app owns the visuals; the model does not emit HTML or OpenUI Lang.
 
 ## System behavior
 
