@@ -1,6 +1,8 @@
 # Screenshots
 
-Product captures and architecture boards for the root README.
+Live product captures. Architecture boards live next to the **root** `README.md`:
+
+`architecture.png` · `monorepo.png` · `tally-boundary.png` · `genui-catalog.png`
 
 | File | |
 | --- | --- |
@@ -9,7 +11,3 @@ Product captures and architecture boards for the root README.
 | `pipeline.png` | Desktop Kanban |
 | `customers.png` | Customer table |
 | `tally.png` | Customer genUI card |
-| `architecture.png` | Runtime |
-| `tally-boundary.png` | Trust steps |
-| `monorepo.png` | Workspace map |
-| `genui-catalog.png` | Widget catalog |

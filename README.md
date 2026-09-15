@@ -4,7 +4,34 @@ Internal **sales admin** (customers, deals, pipeline) plus **Tally** — a LangG
 
 Take-home built as a real product: typed contracts, Nest-owned invariants, first-party auth, HITL writes.
 
-![Dashboard with Tally](docs/screenshots/dashboard.png)
+## Architecture
+
+![Runtime architecture](./architecture.png)
+
+Browser talks only to Next (`:3000`). `/api/*` **rewrites** to Nest (`:3001`) so the session cookie is first-party. Tally (`:8100`) is never called from the browser.
+
+![pnpm Turborepo map](./monorepo.png)
+
+| Path | Role |
+| --- | --- |
+| `apps/web` | UI |
+| `apps/api` | REST + agent proxy |
+| `apps/agent` | LangGraph |
+| `packages/db` | schema, migrations, seed |
+| `packages/shared` | Zod shared by web + api |
+
+![Tally trust boundary](./tally-boundary.png)
+
+1. `POST /api/agent/chat` with cookie  
+2. Nest verifies JWT, proxies **SSE** with `AGENT_INTERNAL_TOKEN`  
+3. Tools call Nest HTTP (`X-Acting-User-Id`) — **no CRM SQL in the graph**  
+4. Writes `interrupt()` until Approve  
+
+![GenUI catalog](./genui-catalog.png)
+
+Closed catalog, **one data widget per turn**: `KpiStrip` · `CustomerCard` · `CustomerList` · `SalesTable` · `PipelineSummary` · `ConfirmAction`
+
+Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions.md](./specs/decisions.md)
 
 ## Keywords
 
@@ -20,32 +47,9 @@ Take-home built as a real product: typed contracts, Nest-owned invariants, first
 | Agent | FastAPI + LangGraph, DeepSeek via OpenCode Go |
 | Repo | pnpm workspaces, Turborepo |
 
-## Architecture
-
-![Runtime architecture](docs/screenshots/architecture.png)
-
-Browser talks only to Next (`:3000`). `/api/*` **rewrites** to Nest (`:3001`) so the session cookie is first-party. Tally (`:8100`) is never called from the browser.
-
-![pnpm Turborepo map](docs/screenshots/monorepo.png)
-
-| Path | Role |
-| --- | --- |
-| `apps/web` | UI |
-| `apps/api` | REST + agent proxy |
-| `apps/agent` | LangGraph |
-| `packages/db` | schema, migrations, seed |
-| `packages/shared` | Zod shared by web + api |
-
-![Tally trust boundary](docs/screenshots/tally-boundary.png)
-
-1. `POST /api/agent/chat` with cookie  
-2. Nest verifies JWT, proxies **SSE** with `AGENT_INTERNAL_TOKEN`  
-3. Tools call Nest HTTP (`X-Acting-User-Id`) — **no CRM SQL in the graph**  
-4. Writes `interrupt()` until Approve  
-
-Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions.md](./specs/decisions.md)
-
 ## Product
+
+![Dashboard with Tally](docs/screenshots/dashboard.png)
 
 ![Login](docs/screenshots/login.png)
 
@@ -56,11 +60,7 @@ Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions
 - Dashboard KPIs; **revenue = completed only**  
 - Customers / sales CRUD  
 - Pipeline: drag on desktop, stage + Move-to on mobile; **cancelled off the board**  
-- Tally: tools, Postgres checkpointer, long-term `agent_memories`, closed genUI catalog  
-
-![GenUI catalog](docs/screenshots/genui-catalog.png)
-
-`KpiStrip` · `CustomerCard` · `CustomerList` · `SalesTable` · `PipelineSummary` · `ConfirmAction` — **one data widget per turn**
+- Tally: tools, Postgres checkpointer, long-term `agent_memories`
 
 ## Decisions I would defend in interview
 
