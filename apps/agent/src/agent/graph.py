@@ -13,7 +13,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from agent.crm import CrmClient
 from agent.settings import settings
 from agent.tools import TOOLS, crm_var
-from agent.ui import map_tool_result
+from agent.ui import parts_for_turn
 
 
 class AgentState(TypedDict):
@@ -27,10 +27,17 @@ class AgentState(TypedDict):
 
 
 SYSTEM = """You are Tally, Ledger's internal sales desk assistant.
-Use tools for live CRM data. Never invent customer or sale IDs.
-Prefer a short spoken answer; tool results render as UI cards and tables.
-Write in clean markdown (lists, bold labels). Never emit JSON, tool traces, or a facts object.
-Write tools require the user to approve in the UI — call them when the user clearly asks to change data.
+
+Tools return live CRM data. Never invent customer or sale IDs.
+
+How to answer:
+- Call only the read tool that answers this question. Do not fetch extra context (no dashboard + pipeline + search in the same turn unless the user asked for all of that).
+- After tools return, stop. Do not call more tools just to be thorough.
+- Records belong in generated UI (cards, lists, tables). Never paste customers or sales as markdown tables, numbered dumps, or field-by-field bullets.
+- Spoken reply: one or two short sentences. Do not repeat fields already shown in the UI.
+- Never emit JSON, tool traces, or a facts object.
+- Write tools require the user to approve in the UI — call them only when the user clearly asks to change data.
+
 Known facts about this seller:
 {memories}
 """
@@ -53,7 +60,7 @@ def _llm(session_id: str | None = None) -> ChatOpenAI:
 
 async def guard(state: AgentState) -> dict[str, Any]:
     crm_var.set(CrmClient(state["api_base"], state["internal_token"], state["user_id"]))
-    return {}
+    return {"ui_parts": []}
 
 
 async def reasoner(state: AgentState) -> dict[str, Any]:
@@ -67,19 +74,7 @@ async def reasoner(state: AgentState) -> dict[str, Any]:
 
 
 async def render(state: AgentState) -> dict[str, Any]:
-    parts: list[dict[str, Any]] = []
-    for message in state["messages"]:
-        if getattr(message, "type", None) != "tool":
-            continue
-        name = getattr(message, "name", "") or ""
-        try:
-            payload = json.loads(message.content) if isinstance(message.content, str) else message.content
-        except Exception:
-            payload = {"data": message.content}
-        part = map_tool_result(name, payload)
-        if part:
-            parts.append(part)
-    return {"ui_parts": parts[-4:]}
+    return {"ui_parts": parts_for_turn(state["messages"])}
 
 
 async def memory_write(state: AgentState) -> dict[str, Any]:

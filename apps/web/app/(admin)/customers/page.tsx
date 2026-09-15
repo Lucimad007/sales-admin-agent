@@ -76,12 +76,48 @@ export default function CustomersPage() {
         </Button>
       </div>
       <Input
-        className="mt-5 max-w-sm"
+        className="mt-5 w-full"
         placeholder="Search name, email, phone"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-      <div className="mt-4 overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift">
+      <ul className="mt-4 space-y-2 lg:hidden">
+        {list.data?.data.map((c) => (
+          <li key={c.id} className="rounded-[12px] border border-line bg-panel p-3 shadow-paper">
+            <Link className="text-sm font-medium transition-colors hover:text-copper" href={`/customers/${c.id}`}>
+              {c.firstName} {c.lastName}
+            </Link>
+            <p className="mt-1 break-all font-mono text-[12px] text-ink">{c.email}</p>
+            <p className="mt-0.5 text-sm text-ink-muted">{c.phone}</p>
+            <div className="-ml-2 mt-2 flex flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditing(c);
+                  setForm({
+                    firstName: c.firstName,
+                    lastName: c.lastName,
+                    phone: c.phone,
+                    email: c.email,
+                    address: c.address,
+                  });
+                  setOpen(true);
+                }}
+              >
+                Edit
+              </Button>
+              <Button variant="danger-ghost" size="sm" onClick={() => remove.mutate(c.id)}>
+                Delete
+              </Button>
+            </div>
+          </li>
+        ))}
+        {list.data?.data.length === 0 ? (
+          <li className="rounded-[12px] border border-line bg-panel px-4 py-8 text-sm text-ink-muted">No customers match.</li>
+        ) : null}
+      </ul>
+      <div className="mt-4 hidden overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift lg:block">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line bg-canvas/80 text-[11px] uppercase tracking-[0.12em] text-ink-muted">
             <tr>
@@ -141,7 +177,7 @@ export default function CustomersPage() {
               save.mutate();
             }}
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="First name" value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
               <Field label="Last name" value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} />
             </div>

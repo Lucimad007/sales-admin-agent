@@ -15,7 +15,7 @@ Next.js App Router in `apps/web`. TanStack Query. shadcn/ui restyled to [design.
 
 `/` redirects to `/dashboard`.
 
-Admin shell: left nav, top bar (user + logout), Tally rail on the right (collapsible). `Cmd/Ctrl+K` focuses Tally's composer.
+Admin shell: left nav, top bar (user + logout), Tally rail on the right (collapsible). `Cmd/Ctrl+K` focuses Tally's composer. Below `lg`, nav is a drawer, Tally is a full-screen overlay closed by default, customer/sales lists render as stacked cards, and the pipeline is a single stage with a Move-to control.
 
 ## Query keys
 
@@ -31,7 +31,7 @@ Mutations invalidate the matching lists plus `dashboard`. Kanban status patch in
 
 ## Kanban
 
-Columns: New, In Progress, Completed. Board uses the `Kanban` primitive in `components/ui` (`@dnd-kit`). Optimistic status update; rollback on error. Cancelled is hidden here. Column order is fixed.
+Columns: New, In Progress, Completed. Desktop uses the `Kanban` primitive (`@dnd-kit`) with drag between columns. Below `lg`, a stage tab list shows one column at a time and cards move via a select. Cards show Ledger `Badge`s (Deal + status). Optimistic status update; rollback on error. Cancelled is hidden here. Column order is fixed.
 
 ## Forms
 
@@ -41,9 +41,10 @@ Customer and sale create/edit in dialogs on list pages; detail pages allow edit 
 
 - Persistent thread per user (server-side `thread:{userId}`)
 - Stream tokens into the last assistant message
-- Render `ui` parts with a registry
+- Render `ui` parts with a registry. One data widget per turn (`CustomerCard` / `CustomerList` / `SalesTable` / `KpiStrip` / `PipelineSummary`); records are cards/tables, not markdown dumps.
 - `interrupt` shows `ConfirmAction`; Approve calls resume `approve`, Reject calls `reject`
 - Health query: if `llm` is false, show setup empty state instead of the composer being “broken”
+- First open seeds a Tally welcome message plus clickable “Try asking” prompts (revenue, pipeline, customers, open deals). ⌘K focuses the composer.
 
 ## Fetch
 

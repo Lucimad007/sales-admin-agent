@@ -101,10 +101,10 @@ export default function SalesPage() {
           New sale
         </Button>
       </div>
-      <div className="mt-5 flex flex-wrap gap-3">
-        <Input className="max-w-sm" placeholder="Search product or notes" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <Input className="w-full sm:max-w-sm" placeholder="Search product or notes" value={q} onChange={(e) => setQ(e.target.value)} />
         <select
-          className="ledger-select"
+          className="ledger-select w-full sm:w-auto"
           value={status}
           onChange={(e) => setStatus(e.target.value as SaleStatus | "")}
         >
@@ -116,7 +116,47 @@ export default function SalesPage() {
           ))}
         </select>
       </div>
-      <div className="mt-4 overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift">
+      <ul className="mt-4 space-y-2 lg:hidden">
+        {list.data?.data.map((s) => (
+          <li key={s.id} className="rounded-[12px] border border-line bg-panel p-3 shadow-paper">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <p className="min-w-0 break-words text-sm font-medium">{s.productName}</p>
+              <StatusChip status={s.status} />
+            </div>
+            <p className="mt-1 text-sm text-ink-muted">
+              {s.customer ? `${s.customer.firstName} ${s.customer.lastName}` : "—"}
+            </p>
+            <p className="mt-1 font-mono text-sm text-copper">{formatMoney(s.price)}</p>
+            <p className="mt-0.5 text-xs text-ink-muted">{formatDate(s.createdAt)}</p>
+            <div className="-ml-2 mt-2 flex flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditing(s);
+                  setForm({
+                    customerId: s.customerId,
+                    productName: s.productName,
+                    price: s.price,
+                    status: s.status,
+                    notes: s.notes,
+                  });
+                  setOpen(true);
+                }}
+              >
+                Edit
+              </Button>
+              <Button variant="danger-ghost" size="sm" onClick={() => remove.mutate(s.id)}>
+                Delete
+              </Button>
+            </div>
+          </li>
+        ))}
+        {list.data?.data.length === 0 ? (
+          <li className="rounded-[12px] border border-line bg-panel px-4 py-8 text-sm text-ink-muted">No sales match.</li>
+        ) : null}
+      </ul>
+      <div className="mt-4 hidden overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift lg:block">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line bg-canvas/80 text-[11px] uppercase tracking-[0.12em] text-ink-muted">
             <tr>
@@ -202,7 +242,7 @@ export default function SalesPage() {
               <Label>Product / service</Label>
               <Input value={form.productName} onChange={(e) => setForm({ ...form, productName: e.target.value })} required />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Price</Label>
                 <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />

@@ -66,7 +66,7 @@ See [specs/architecture.md](./specs/architecture.md) and [specs/decisions.md](./
 - Tools: dashboard, customers, sales, pipeline, plus write tools with LangGraph `interrupt()` confirmation
 - Short-term memory: Postgres checkpointer (`langgraph` schema)
 - Long-term memory: `agent_memories` via `POST /api/agent/memories`
-- GenUI parts: `KpiStrip`, `CustomerCard`, `SalesTable`, `PipelineSummary`, `ConfirmAction`, `Markdown`
+- GenUI parts: `KpiStrip`, `CustomerCard`, `CustomerList`, `SalesTable`, `PipelineSummary`, `ConfirmAction`, `Markdown` (one data widget per turn)
 
 ## AI tools used
 

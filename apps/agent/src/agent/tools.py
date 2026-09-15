@@ -33,26 +33,26 @@ def _confirm(action: str, args: dict[str, Any], preview: str) -> dict[str, Any]:
 
 @tool
 async def get_dashboard_stats() -> dict[str, Any]:
-    """Return dashboard KPIs: customers, sales, revenue, status breakdown."""
+    """KPIs only: customer count, sale count, completed revenue. Call only when the user asks for totals, KPIs, or closed revenue — never as extra context."""
     return await current_crm().get("/dashboard")
 
 
 @tool
 async def search_customers(q: str = "") -> dict[str, Any]:
-    """Search customers by name, email, or phone."""
-    return await current_crm().get("/customers", params={"q": q, "pageSize": 20})
+    """Search customers by name, email, or phone. Results render as a customer list/card. Do not follow up with get_customer for each row."""
+    return await current_crm().get("/customers", params={"q": q, "pageSize": 8})
 
 
 @tool
 async def get_customer(customer_id: str) -> dict[str, Any]:
-    """Fetch one customer by UUID."""
+    """Fetch one customer by UUID when you already have the id and need the full record. Never loop this over search results."""
     return await current_crm().get(f"/customers/{customer_id}")
 
 
 @tool
 async def search_sales(q: str = "", status: str | None = None) -> dict[str, Any]:
-    """Search sales by product or notes. Optional status filter."""
-    params: dict[str, Any] = {"q": q, "pageSize": 20}
+    """Search sales by product or notes. Optional status filter. Results render as a table. Call only when the user asks about deals/sales."""
+    params: dict[str, Any] = {"q": q, "pageSize": 8}
     if status:
         params["status"] = status
     return await current_crm().get("/sales", params=params)
@@ -60,7 +60,7 @@ async def search_sales(q: str = "", status: str | None = None) -> dict[str, Any]
 
 @tool
 async def get_pipeline() -> dict[str, Any]:
-    """Summarize pipeline columns New / In Progress / Completed with counts and totals."""
+    """Pipeline columns New / In Progress / Completed with counts and totals. Call only when the user asks about pipeline or stages."""
     payload = await current_crm().get("/sales", params={"pageSize": 100})
     rows = payload.get("data") or []
     columns: dict[str, dict[str, Any]] = {

@@ -67,14 +67,14 @@ export default function DashboardPage() {
           </div>
           <ul>
             {data?.recentSales.map((sale) => (
-              <li key={sale.id} className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 last:border-0 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
-                <div>
-                  <p className="text-sm">{sale.productName}</p>
+              <li key={sale.id} className="flex flex-col gap-2 border-b border-line px-4 py-2.5 last:border-0 transition-colors duration-150 ease-ledger hover:bg-canvas/70 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm">{sale.productName}</p>
                   <p className="text-xs text-ink-muted">
                     {sale.customerName} · {formatDate(sale.createdAt)}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                   <span className="font-mono text-sm text-copper">{formatMoney(sale.price)}</span>
                   <StatusChip status={sale.status} />
                 </div>

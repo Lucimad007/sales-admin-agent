@@ -33,7 +33,7 @@ Radius: 12px cards, 8px controls, 6px badges. Surfaces lift with warm espresso s
 
 ## Density
 
-Tight tables (row py ~10px). Sidebar ~232px. Tally rail ~360px. Motion 150–200ms, ease `cubic-bezier(0.32, 0.72, 0, 1)`.
+Tight tables (row py ~10px). Sidebar ~232px on desktop; a Menu drawer on small screens. Tally rail ~360px on desktop; full-screen overlay on small screens. Motion 150–200ms, ease `cubic-bezier(0.32, 0.72, 0, 1)`.
 
 ## Components
 
@@ -41,17 +41,18 @@ Tight tables (row py ~10px). Sidebar ~232px. Tally rail ~360px. Motion 150–200
 - Secondary: panel fill, ink label, line border, paper shadow
 - Destructive: danger text in tables (`danger-ghost`); filled danger only for a confirming destroy
 - Approve / success: `--success` fill
-- Status chips: tinted wash plus a 1px status ring, mono 11px
+- Status chips: tinted wash plus a 1px status ring, mono 11px (built on `Badge`)
+- Badge: 6px radius, mono 11px; outline / copper / status variants
 - Money: copper, IBM Plex Mono
 - Toasts: success green wash, error red wash
 - KPI: label muted, value IBM Plex Sans 28px, not a rainbow icon grid; revenue card gets a copper top edge
-- Kanban column: panel, status color as 3px top edge
+- Kanban column: panel, status color as 3px top edge; count badge in the header; cards show Deal + status. On small screens, one stage at a time with a Move-to control — not a squeezed three-column board.
 - Tally: copper 3px left rule on the rail; copper 2px left rule on assistant messages; no purple glow, no sparkle spam
 
 ## Layout
 
-Left: wordmark “Ledger” + nav (Dashboard, Customers, Sales, Pipeline).  
-Main: page title, one-line description, actions aligned right.  
-Right: Tally.
+Left: wordmark “Ledger” + nav (Dashboard, Customers, Sales, Pipeline). On small screens the nav is behind Menu.  
+Main: page title, one-line description, actions aligned right (stack on narrow viewports).  
+Right: Tally. On small screens Tally is a full-screen overlay, closed by default.
 
 Login is a single centered panel on the canvas — not a split illustration hero.

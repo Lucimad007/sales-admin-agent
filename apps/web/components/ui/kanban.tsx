@@ -112,7 +112,7 @@ function Kanban<T>({ value, onValueChange, getItemValue, children, className, on
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 10,
+        distance: 12,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -286,7 +286,7 @@ function KanbanBoard({ children, className }: KanbanBoardProps) {
 
   return (
     <SortableContext items={columnIds} strategy={rectSortingStrategy}>
-      <div data-slot="kanban-board" className={cn("grid auto-rows-fr gap-4 sm:grid-cols-3", className)}>
+      <div data-slot="kanban-board" className={cn("grid auto-rows-fr gap-4", className)}>
         {children}
       </div>
     </SortableContext>

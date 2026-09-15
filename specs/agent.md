@@ -68,14 +68,19 @@ Every part: `{ "id": string, "type": string, "props": object }`.
 - `Markdown` — `{ markdown: string }`
 - `KpiStrip` — `{ items: { label: string, value: string }[] }`
 - `CustomerCard` — customer fields + id
+- `CustomerList` — compact rows when search returns more than one customer
 - `SalesTable` — `{ rows: { id, productName, customerName, price, status, createdAt }[] }`
 - `PipelineSummary` — `{ columns: { status, count, total }[] }`
 - `ConfirmAction` — `{ title, summary, action, args }`
 
 Zod schemas live in `packages/shared`. Python emits the same JSON shapes.
 
+`render` maps **this turn's** tool messages only (after the last human message), then keeps **one** data widget (plus `ConfirmAction` if present). Extra KPIs/pipeline/cards from leftover tool calls are dropped.
+
 ## System behavior
 
-- Be concise. Prefer a genUI part over a long table in markdown.
+- Call the one read tool that answers the question. Do not fetch dashboard/pipeline as extra context.
+- Records belong in genUI, never as markdown tables or field dumps.
+- Spoken reply is one or two sentences; do not repeat UI fields.
 - Never invent IDs. Search first.
 - If `OPENCODE_GO_API_KEY` is missing, FastAPI `/health` returns `llm: false`; Nest surfaces that to the UI.

@@ -53,6 +53,23 @@ export function GenUi({
       </Card>
     );
   }
+  if (part.type === "CustomerList") {
+    return (
+      <Card className="min-w-0 overflow-hidden p-0">
+        <ul>
+          {part.props.rows.map((row) => (
+            <li key={row.id} className="border-b border-line px-3 py-2.5 last:border-0">
+              <Link href={`/customers/${row.id}`} className="font-medium hover:text-copper">
+                {row.firstName} {row.lastName}
+              </Link>
+              <p className="mt-0.5 break-all font-mono text-[12px] text-ink-muted">{row.email}</p>
+              <p className="text-sm text-ink-muted">{row.phone}</p>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    );
+  }
   if (part.type === "SalesTable") {
     return (
       <Card className="min-w-0 overflow-hidden p-0">
@@ -106,5 +123,8 @@ export function GenUi({
       </Card>
     );
   }
-  return <ChatMarkdown text={part.props.markdown} />;
+  if (part.type === "Markdown") {
+    return <ChatMarkdown text={part.props.markdown} />;
+  }
+  return null;
 }

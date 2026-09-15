@@ -35,15 +35,15 @@ export default function CustomerDetailPage() {
         {c.firstName} {c.lastName}
       </h1>
       <Card className="mt-5 max-w-xl space-y-1 text-sm">
-        <p className="font-mono">{c.email}</p>
+        <p className="break-all font-mono">{c.email}</p>
         <p>{c.phone}</p>
         <p className="text-ink-muted">{c.address}</p>
       </Card>
       <h2 className="mt-8 text-lg font-medium">Sales</h2>
       <ul className="mt-3 divide-y divide-line rounded-[12px] border border-line bg-panel shadow-lift">
         {sales.data?.data.map((s) => (
-          <li key={s.id} className="flex items-center justify-between px-4 py-2.5 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
-            <div>
+          <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
+            <div className="min-w-0">
               <p>{s.productName}</p>
               <p className="font-mono text-xs text-copper">{formatMoney(s.price)}</p>
             </div>

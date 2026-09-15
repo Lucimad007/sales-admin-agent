@@ -20,6 +20,21 @@ type Msg = {
   pending?: boolean;
 };
 
+const WELCOME_ID = "tally-welcome";
+
+const WELCOME_TEXT = `I'm **Tally**, your sales desk on this ledger.
+
+I can look up customers, pipeline, and closed revenue from live data. If you ask me to change a record, I'll show an Approve step first.
+
+Try a prompt below, type a question, or press **⌘K** to focus the composer.`;
+
+const SUGGESTIONS = [
+  { label: "Closed revenue", prompt: "What's our closed revenue and how many completed sales?" },
+  { label: "Pipeline", prompt: "Summarize the pipeline by stage." },
+  { label: "Find a customer", prompt: "Look up customer Ali Fatemi" },
+  { label: "Open deals", prompt: "Which deals are in progress?" },
+] as const;
+
 async function readSse(
   res: Response,
   onEvent: (event: string, data: unknown) => void,
@@ -56,7 +71,9 @@ async function readSse(
 export function CopilotRail({ onClose }: { onClose: () => void }) {
   const composer = useRef<HTMLTextAreaElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => [
+    { id: WELCOME_ID, role: "assistant", text: WELCOME_TEXT, parts: [] },
+  ]);
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
@@ -67,6 +84,10 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
     queryFn: () => apiData<AgentHealth>("/api/agent/health"),
     refetchInterval: 15_000,
   });
+
+  const llmReady = Boolean(health.data?.ok && health.data.llm);
+  const showIdle = health.isFetched && !llmReady;
+  const showHints = !messages.some((m) => m.role === "user");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -93,7 +114,11 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
         }
         if (event === "ui") {
           const part = (data as { part: GenUiPart }).part;
-          return { ...m, parts: [...m.parts, part] };
+          const parts =
+            part.type === "ConfirmAction"
+              ? [...m.parts.filter((p) => p.type !== "ConfirmAction"), part]
+              : [...m.parts.filter((p) => p.type === "ConfirmAction"), part];
+          return { ...m, parts };
         }
         if (event === "thread") {
           setThreadId((data as { threadId: string }).threadId);
@@ -107,9 +132,9 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
     );
   };
 
-  const send = async () => {
-    const text = input.trim();
-    if (!text || busy) return;
+  const send = async (preset?: string) => {
+    const text = (preset ?? input).trim();
+    if (!text || busy || !llmReady) return;
     setInput("");
     const userId = crypto.randomUUID();
     const assistantId = crypto.randomUUID();
@@ -138,6 +163,15 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const pickSuggestion = (prompt: string) => {
+    if (!llmReady || busy) {
+      setInput(prompt);
+      composer.current?.focus();
+      return;
+    }
+    void send(prompt);
+  };
+
   const resume = useMutation({
     mutationFn: async (decision: "approve" | "reject") => {
       const assistantId = crypto.randomUUID();
@@ -156,10 +190,8 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
     onSettled: () => setBusy(false),
   });
 
-  const llmReady = health.data?.ok && health.data.llm;
-
   return (
-    <aside className="fixed inset-y-0 right-0 z-20 flex w-[360px] flex-col border-l-[3px] border-l-copper bg-panel shadow-float">
+    <aside className="fixed inset-0 z-40 flex w-full flex-col border-l-[3px] border-l-copper bg-panel shadow-float pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] lg:pt-0 lg:pb-0">
       <div className="flex h-14 items-center justify-between border-b border-line px-4">
         <div>
           <p className="text-sm font-medium">Tally</p>
@@ -170,12 +202,6 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
       <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4">
-        {!llmReady ? (
-          <p className="text-sm leading-6 text-ink-muted">
-            Tally is idle. Set <span className="font-mono">OPENCODE_GO_API_KEY</span> and start the Python agent.
-            CRM still works without it.
-          </p>
-        ) : null}
         {messages.map((m) => (
           <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
             <div
@@ -214,6 +240,30 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         ))}
+        {showHints ? (
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">Try asking</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {SUGGESTIONS.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => pickSuggestion(item.prompt)}
+                  disabled={busy}
+                  className="min-h-9 rounded-md border border-line bg-canvas/80 px-2.5 py-1.5 text-left font-mono text-[11px] text-ink shadow-paper transition-[color,border-color,background-color] duration-200 ease-ledger hover:border-copper hover:text-copper disabled:opacity-50"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {showIdle ? (
+          <p className="text-sm leading-6 text-ink-muted">
+            Tally is idle. Set <span className="font-mono">OPENCODE_GO_API_KEY</span> and start the Python agent.
+            CRM still works without it. Prompts above fill the composer until the desk is online.
+          </p>
+        ) : null}
       </div>
       <form
         className="border-t border-line p-3"
@@ -224,9 +274,10 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
       >
         <Textarea
           ref={composer}
+          data-tally-composer
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={llmReady ? "Ask Tally about pipeline, customers, revenue…" : "Tally unavailable"}
+          placeholder={llmReady ? "Ask about revenue, a customer, or the pipeline…" : "Tally unavailable"}
           disabled={!llmReady || busy}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -235,7 +286,8 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
             }
           }}
         />
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">⌘K · Enter to send</p>
           <Button type="submit" size="sm" disabled={!llmReady || busy || !input.trim()}>
             Send
           </Button>

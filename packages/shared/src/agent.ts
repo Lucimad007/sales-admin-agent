@@ -27,6 +27,22 @@ export const customerCardPartSchema = z.object({
   }),
 });
 
+export const customerListPartSchema = z.object({
+  type: z.literal("CustomerList"),
+  id: z.string(),
+  props: z.object({
+    rows: z.array(
+      z.object({
+        id: z.string(),
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string(),
+        phone: z.string(),
+      }),
+    ),
+  }),
+});
+
 export const salesTablePartSchema = z.object({
   type: z.literal("SalesTable"),
   id: z.string(),
@@ -80,6 +96,7 @@ export const markdownPartSchema = z.object({
 export const genUiPartSchema = z.discriminatedUnion("type", [
   kpiStripPartSchema,
   customerCardPartSchema,
+  customerListPartSchema,
   salesTablePartSchema,
   pipelineSummaryPartSchema,
   confirmActionPartSchema,
