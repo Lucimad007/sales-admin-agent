@@ -4,6 +4,12 @@ Internal **sales admin** (customers, deals, pipeline) plus **Tally** — a LangG
 
 Take-home built as a real product: typed contracts, Nest-owned invariants, first-party auth, HITL writes.
 
+**Example — Tally will not write until you Approve.** LangGraph `interrupt()`. Nest is not called yet.
+
+![Approve create customer](docs/screenshots/tally-approve-customer.png)
+
+![Approve create sale](docs/screenshots/tally-approve-sale.png)
+
 ## Architecture
 
 ![Runtime architecture](./architecture.png)
@@ -26,12 +32,6 @@ Browser talks only to Next (`:3000`). `/api/*` **rewrites** to Nest (`:3001`) so
 2. Nest verifies JWT, proxies **SSE** with `AGENT_INTERNAL_TOKEN`  
 3. Tools call Nest HTTP (`X-Acting-User-Id`) — **no CRM SQL in the graph**  
 4. Writes `interrupt()` until Approve  
-
-Writes pause on a **ConfirmAction** card until you Approve or Reject. Nothing hits Nest until then.
-
-![Approve create customer](docs/screenshots/tally-approve-customer.png)
-
-![Approve create sale](docs/screenshots/tally-approve-sale.png)
 
 ![GenUI catalog](./genui-catalog.png)
 
