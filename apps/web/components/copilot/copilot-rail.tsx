@@ -1,0 +1,246 @@
+"use client";
+
+import type { AgentHealth, GenUiPart } from "@sales/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { ChatMarkdown } from "@/components/copilot/chat-markdown";
+import { GenUi } from "@/components/copilot/gen-ui";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { apiData } from "@/lib/api";
+import { qk } from "@/lib/query-keys";
+import { cn } from "@/lib/utils";
+
+type Msg = {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  parts: GenUiPart[];
+  threadId?: string;
+  pending?: boolean;
+};
+
+async function readSse(
+  res: Response,
+  onEvent: (event: string, data: unknown) => void,
+) {
+  if (!res.body) {
+    throw new Error("No stream");
+  }
+  if (!res.ok) {
+    const json = await res.json().catch(() => null);
+    throw new Error(json?.error?.message ?? "Tally request failed");
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const chunks = buf.split("\n\n");
+    buf = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const lines = chunk.split("\n");
+      const event = lines.find((l) => l.startsWith("event: "))?.slice(7);
+      const data = lines
+        .filter((l) => l.startsWith("data: "))
+        .map((l) => l.slice(6))
+        .join("");
+      if (!event || !data) continue;
+      onEvent(event, JSON.parse(data));
+    }
+  }
+}
+
+export function CopilotRail({ onClose }: { onClose: () => void }) {
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [input, setInput] = useState("");
+  const [threadId, setThreadId] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
+
+  const health = useQuery({
+    queryKey: qk.agentHealth,
+    queryFn: () => apiData<AgentHealth>("/api/agent/health"),
+    refetchInterval: 15_000,
+  });
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        composer.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
+  }, [messages]);
+
+  const applyEvent = (assistantId: string, event: string, data: unknown) => {
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== assistantId) return m;
+        if (event === "token") {
+          const text = (data as { text: string }).text;
+          return { ...m, text: m.text + text };
+        }
+        if (event === "ui") {
+          const part = (data as { part: GenUiPart }).part;
+          return { ...m, parts: [...m.parts, part] };
+        }
+        if (event === "thread") {
+          setThreadId((data as { threadId: string }).threadId);
+          return { ...m, threadId: (data as { threadId: string }).threadId };
+        }
+        if (event === "error") {
+          return { ...m, text: m.text || (data as { message: string }).message };
+        }
+        return m;
+      }),
+    );
+  };
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy) return;
+    setInput("");
+    const userId = crypto.randomUUID();
+    const assistantId = crypto.randomUUID();
+    setMessages((m) => [
+      ...m,
+      { id: userId, role: "user", text, parts: [] },
+      { id: assistantId, role: "assistant", text: "", parts: [], pending: true },
+    ]);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/agent/chat", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, threadId }),
+      });
+      await readSse(res, (event, data) => applyEvent(assistantId, event, data));
+      void qc.invalidateQueries();
+    } catch (error) {
+      applyEvent(assistantId, "error", {
+        message: error instanceof Error ? error.message : "Tally failed",
+      });
+    } finally {
+      setBusy(false);
+      setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, pending: false } : m)));
+    }
+  };
+
+  const resume = useMutation({
+    mutationFn: async (decision: "approve" | "reject") => {
+      const assistantId = crypto.randomUUID();
+      setMessages((m) => [...m, { id: assistantId, role: "assistant", text: "", parts: [], pending: true }]);
+      setBusy(true);
+      const res = await fetch(`/api/agent/threads/${threadId}/resume`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision }),
+      });
+      await readSse(res, (event, data) => applyEvent(assistantId, event, data));
+      void qc.invalidateQueries();
+      setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, pending: false } : m)));
+    },
+    onSettled: () => setBusy(false),
+  });
+
+  const llmReady = health.data?.ok && health.data.llm;
+
+  return (
+    <aside className="fixed inset-y-0 right-0 z-20 flex w-[360px] flex-col border-l border-line bg-panel">
+      <div className="flex h-14 items-center justify-between border-b border-line px-4">
+        <div>
+          <p className="text-sm font-medium">Tally</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-copper">Sales desk</p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          Close
+        </Button>
+      </div>
+      <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4">
+        {!llmReady ? (
+          <p className="text-sm leading-6 text-ink-muted">
+            Tally is idle. Set <span className="font-mono">OPENCODE_GO_API_KEY</span> and start the Python agent.
+            CRM still works without it.
+          </p>
+        ) : null}
+        {messages.map((m) => (
+          <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+            <div
+              className={cn(
+                "min-w-0",
+                m.role === "user" ? "max-w-[92%] rounded-[10px] bg-canvas px-3 py-2" : "w-full",
+              )}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
+                {m.role === "user" ? "You" : "Tally"}
+              </p>
+              {m.text ? (
+                <div className={cn("mt-1", m.role === "assistant" && "border-l-2 border-copper pl-3")}>
+                  {m.role === "assistant" ? (
+                    <ChatMarkdown text={m.text} />
+                  ) : (
+                    <p className="break-words text-sm leading-6">{m.text}</p>
+                  )}
+                </div>
+              ) : m.pending ? (
+                <p className="mt-1 text-sm text-ink-muted">Thinking…</p>
+              ) : null}
+              {m.parts.length > 0 ? (
+                <div className="mt-2 min-w-0 space-y-2">
+                  {m.parts.map((part) => (
+                    <GenUi
+                      key={part.id}
+                      part={part}
+                      busy={busy}
+                      onApprove={() => resume.mutate("approve")}
+                      onReject={() => resume.mutate("reject")}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+      <form
+        className="border-t border-line p-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send();
+        }}
+      >
+        <Textarea
+          ref={composer}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={llmReady ? "Ask Tally about pipeline, customers, revenue…" : "Tally unavailable"}
+          disabled={!llmReady || busy}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              void send();
+            }
+          }}
+        />
+        <div className="mt-2 flex justify-end">
+          <Button type="submit" size="sm" disabled={!llmReady || busy || !input.trim()}>
+            Send
+          </Button>
+        </div>
+      </form>
+    </aside>
+  );
+}

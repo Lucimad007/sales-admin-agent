@@ -1,0 +1,11 @@
+{
+  "name": "@sales/agent",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "uv run --directory . uvicorn agent.main:app --reload --port 8100 --app-dir src",
+    "start": "uv run --directory . uvicorn agent.main:app --port 8100 --app-dir src",
+    "test": "uv run --directory . pytest",
+    "lint": "node -e \"process.exit(0)\""
+  }
+}

@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #f6f1e8;
+  color: #1c1915;
+}
+
+body {
+  font-feature-settings: "ss01" on, "cv11" on;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e4d9c8 transparent;
+}
+
+::selection {
+  background: #b4572a;
+  color: #fffbf5;
+}
