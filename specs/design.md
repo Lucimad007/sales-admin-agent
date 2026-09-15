@@ -6,24 +6,24 @@ Internal sales console. Dense, warm, operational. Not a marketing landing page.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--canvas` | `#F6F1E8` | app background |
-| `--ink` | `#1C1915` | text |
-| `--ink-muted` | `#6B645B` | secondary text |
-| `--line` | `#E4D9C8` | hairlines |
-| `--panel` | `#FFFBF5` | cards, rail, dialogs |
-| `--copper` | `#B4572A` | primary actions, AI, money |
-| `--copper-hover` | `#9A4923` | |
-| `--new` | `#3F6F8C` | status |
-| `--progress` | `#C4892A` | status |
-| `--done` | `#3F6B4D` | status |
-| `--cancelled` | `#8A7060` | status |
-| `--danger` | `#9B2E2E` | delete, reject, errors |
-| `--danger-hover` | `#7F2424` | |
-| `--success` | `#3F6B4D` | approve, completed, success toasts |
-| `--success-hover` | `#335740` | |
-| `--warn` | `#C4892A` | caution; same family as in-progress |
+| `--canvas` | `#DCC9B0` | toasted paper background |
+| `--ink` | `#16120F` | text |
+| `--ink-muted` | `#4A4139` | secondary text |
+| `--line` | `#C3AD91` | hairlines |
+| `--panel` | `#FFF9F0` | cards, rail, dialogs |
+| `--copper` | `#C44E1F` | primary actions, AI, money |
+| `--copper-hover` | `#A33E18` | |
+| `--new` | `#1E5C7A` | status |
+| `--progress` | `#B56A0C` | status |
+| `--done` | `#1F5236` | status |
+| `--cancelled` | `#6A5648` | status |
+| `--danger` | `#B12C28` | delete, reject, errors |
+| `--danger-hover` | `#8E221F` | |
+| `--success` | `#1F5236` | approve, completed, success toasts |
+| `--success-hover` | `#18422B` | |
+| `--warn` | `#B56A0C` | caution; same family as in-progress |
 
-Radius: 10px cards, 8px controls, 6px badges. No heavy drop shadows; 1px `--line` + barely-there warm shadow `0 1px 0 rgba(28,25,21,0.04)`.
+Radius: 12px cards, 8px controls, 6px badges. Surfaces lift with warm espresso shadows (`shadow-lift` / `shadow-float`), not black. Primary actions carry a copper glow. Canvas sits a full step darker than cream panels so cards read as objects.
 
 ## Type
 
@@ -37,16 +37,16 @@ Tight tables (row py ~10px). Sidebar ~232px. Tally rail ~360px. Motion 150–200
 
 ## Components
 
-- Primary button: copper fill, cream label
-- Secondary: panel fill, ink label, line border
+- Primary button: copper fill, cream label, copper glow, slight lift on hover
+- Secondary: panel fill, ink label, line border, paper shadow
 - Destructive: danger text in tables (`danger-ghost`); filled danger only for a confirming destroy
 - Approve / success: `--success` fill
-- Status chips: tinted by status token, mono 11px
+- Status chips: tinted wash plus a 1px status ring, mono 11px
 - Money: copper, IBM Plex Mono
 - Toasts: success green wash, error red wash
-- KPI: label muted, value IBM Plex Sans 28px, not a rainbow icon grid
+- KPI: label muted, value IBM Plex Sans 28px, not a rainbow icon grid; revenue card gets a copper top edge
 - Kanban column: panel, status color as 3px top edge
-- Tally: copper 2px left rule on assistant messages; no purple glow, no sparkle spam
+- Tally: copper 3px left rule on the rail; copper 2px left rule on assistant messages; no purple glow, no sparkle spam
 
 ## Layout
 

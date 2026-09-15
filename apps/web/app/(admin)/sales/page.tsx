@@ -104,7 +104,7 @@ export default function SalesPage() {
       <div className="mt-5 flex flex-wrap gap-3">
         <Input className="max-w-sm" placeholder="Search product or notes" value={q} onChange={(e) => setQ(e.target.value)} />
         <select
-          className="h-9 rounded-lg border border-line bg-panel px-3 text-sm"
+          className="ledger-select"
           value={status}
           onChange={(e) => setStatus(e.target.value as SaleStatus | "")}
         >
@@ -116,9 +116,9 @@ export default function SalesPage() {
           ))}
         </select>
       </div>
-      <div className="mt-4 overflow-hidden rounded-[10px] border border-line bg-panel">
+      <div className="mt-4 overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-muted">
+          <thead className="border-b border-line bg-canvas/80 text-[11px] uppercase tracking-[0.12em] text-ink-muted">
             <tr>
               <th className="px-4 py-2.5">Product</th>
               <th className="px-4 py-2.5">Customer</th>
@@ -130,7 +130,7 @@ export default function SalesPage() {
           </thead>
           <tbody>
             {list.data?.data.map((s) => (
-              <tr key={s.id} className="border-b border-line last:border-0">
+              <tr key={s.id} className="border-b border-line last:border-0 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
                 <td className="px-4 py-2.5">{s.productName}</td>
                 <td className="px-4 py-2.5">
                   {s.customer ? `${s.customer.firstName} ${s.customer.lastName}` : "—"}
@@ -183,7 +183,7 @@ export default function SalesPage() {
             <div className="space-y-1.5">
               <Label>Customer</Label>
               <select
-                className="h-9 w-full rounded-lg border border-line bg-panel px-3 text-sm"
+                className="ledger-select w-full"
                 value={form.customerId}
                 onChange={(e) => setForm({ ...form, customerId: e.target.value })}
                 required
@@ -210,7 +210,7 @@ export default function SalesPage() {
               <div className="space-y-1.5">
                 <Label>Status</Label>
                 <select
-                  className="h-9 w-full rounded-lg border border-line bg-panel px-3 text-sm"
+                  className="ledger-select w-full"
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value as SaleStatus })}
                 >

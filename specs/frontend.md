@@ -31,7 +31,7 @@ Mutations invalidate the matching lists plus `dashboard`. Kanban status patch in
 
 ## Kanban
 
-Columns: New, In Progress, Completed. Drag with `@dnd-kit`. Optimistic status update; rollback on error. Cancelled is hidden here.
+Columns: New, In Progress, Completed. Board uses the `Kanban` primitive in `components/ui` (`@dnd-kit`). Optimistic status update; rollback on error. Cancelled is hidden here. Column order is fixed.
 
 ## Forms
 

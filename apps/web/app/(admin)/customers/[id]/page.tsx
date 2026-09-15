@@ -28,7 +28,7 @@ export default function CustomerDetailPage() {
 
   return (
     <div>
-      <Link href="/customers" className="text-sm text-ink-muted hover:text-copper">
+      <Link href="/customers" className="text-sm text-ink-muted transition-colors hover:text-copper">
         ← Customers
       </Link>
       <h1 className="mt-3 text-2xl font-medium tracking-tight">
@@ -40,9 +40,9 @@ export default function CustomerDetailPage() {
         <p className="text-ink-muted">{c.address}</p>
       </Card>
       <h2 className="mt-8 text-lg font-medium">Sales</h2>
-      <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line bg-panel">
+      <ul className="mt-3 divide-y divide-line rounded-[12px] border border-line bg-panel shadow-lift">
         {sales.data?.data.map((s) => (
-          <li key={s.id} className="flex items-center justify-between px-4 py-2.5">
+          <li key={s.id} className="flex items-center justify-between px-4 py-2.5 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
             <div>
               <p>{s.productName}</p>
               <p className="font-mono text-xs text-copper">{formatMoney(s.price)}</p>

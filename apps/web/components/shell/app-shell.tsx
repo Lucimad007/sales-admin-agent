@@ -40,7 +40,7 @@ export function AppShell({
 
   return (
     <div className="min-h-[100dvh] bg-canvas">
-      <aside className="fixed inset-y-0 left-0 z-20 flex w-[232px] flex-col border-r border-line bg-panel">
+      <aside className="fixed inset-y-0 left-0 z-20 flex w-[232px] flex-col border-r border-line bg-panel shadow-float">
         <div className="px-5 py-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Ledger</p>
           <p className="mt-1 text-sm text-ink-muted">Sales admin</p>
@@ -53,8 +53,10 @@ export function AppShell({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm transition-colors duration-200 ease-ledger",
-                  active ? "bg-canvas text-ink" : "text-ink-muted hover:bg-canvas hover:text-ink",
+                  "rounded-lg border-l-[3px] px-3 py-2 text-sm transition-[color,background-color,box-shadow,border-color] duration-200 ease-ledger",
+                  active
+                    ? "border-copper bg-canvas font-medium text-ink shadow-paper"
+                    : "border-transparent text-ink-muted hover:bg-canvas/80 hover:text-ink",
                 )}
               >
                 {item.label}
@@ -71,7 +73,7 @@ export function AppShell({
         </div>
       </aside>
       <div className={cn("pl-[232px] transition-[padding] duration-200 ease-ledger", copilotOpen && "pr-[360px]")}>
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-end gap-2 border-b border-line bg-canvas/90 px-6 backdrop-blur">
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-end gap-2 border-b border-line bg-canvas/80 px-6 shadow-paper backdrop-blur-md">
           <Button variant="secondary" size="sm" onClick={() => setCopilotOpen((v) => !v)}>
             {copilotOpen ? "Hide Tally" : "Tally"}
             <span className="font-mono text-[10px] text-ink-muted">⌘K</span>

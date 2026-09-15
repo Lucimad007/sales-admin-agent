@@ -31,9 +31,9 @@ export default function DashboardPage() {
       <p className="mt-1 text-sm text-ink-muted">Closed revenue counts completed sales only.</p>
       <div className="mt-6 grid gap-3 md:grid-cols-3">
         {kpis.map((k) => (
-          <Card key={k.label}>
+          <Card key={k.label} className={cn("hover:-translate-y-0.5 hover:shadow-float", k.money && "border-t-[3px] border-t-copper")}>
             <p className="text-[11px] uppercase tracking-[0.14em] text-ink-muted">{k.label}</p>
-            <p className={cn("mt-2 text-[28px] leading-none tracking-tight", k.money && "text-copper")}>{k.value}</p>
+            <p className={cn("mt-2 text-[28px] leading-none tracking-tight tabular-nums", k.money && "text-copper")}>{k.value}</p>
           </Card>
         ))}
       </div>
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           </div>
           <ul>
             {data?.recentSales.map((sale) => (
-              <li key={sale.id} className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 last:border-0">
+              <li key={sale.id} className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 last:border-0 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
                 <div>
                   <p className="text-sm">{sale.productName}</p>
                   <p className="text-xs text-ink-muted">
@@ -84,7 +84,7 @@ export default function DashboardPage() {
         </Card>
       </div>
       <p className="mt-6 text-sm text-ink-muted">
-        Jump to the <Link className="text-copper" href="/pipeline">pipeline</Link> to move deals.
+        Jump to the <Link className="text-copper underline-offset-4 transition-colors hover:text-copper-hover hover:underline" href="/pipeline">pipeline</Link> to move deals.
       </p>
     </div>
   );

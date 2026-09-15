@@ -81,9 +81,9 @@ export default function CustomersPage() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-      <div className="mt-4 overflow-hidden rounded-[10px] border border-line bg-panel">
+      <div className="mt-4 overflow-hidden rounded-[12px] border border-line bg-panel shadow-lift">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-muted">
+          <thead className="border-b border-line bg-canvas/80 text-[11px] uppercase tracking-[0.12em] text-ink-muted">
             <tr>
               <th className="px-4 py-2.5">Name</th>
               <th className="px-4 py-2.5">Email</th>
@@ -93,9 +93,9 @@ export default function CustomersPage() {
           </thead>
           <tbody>
             {list.data?.data.map((c) => (
-              <tr key={c.id} className="border-b border-line last:border-0">
+              <tr key={c.id} className="border-b border-line last:border-0 transition-colors duration-150 ease-ledger hover:bg-canvas/70">
                 <td className="px-4 py-2.5">
-                  <Link className="hover:text-copper" href={`/customers/${c.id}`}>
+                  <Link className="transition-colors hover:text-copper" href={`/customers/${c.id}`}>
                     {c.firstName} {c.lastName}
                   </Link>
                 </td>

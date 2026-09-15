@@ -159,7 +159,7 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
   const llmReady = health.data?.ok && health.data.llm;
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-20 flex w-[360px] flex-col border-l border-line bg-panel">
+    <aside className="fixed inset-y-0 right-0 z-20 flex w-[360px] flex-col border-l-[3px] border-l-copper bg-panel shadow-float">
       <div className="flex h-14 items-center justify-between border-b border-line px-4">
         <div>
           <p className="text-sm font-medium">Tally</p>
@@ -181,7 +181,7 @@ export function CopilotRail({ onClose }: { onClose: () => void }) {
             <div
               className={cn(
                 "min-w-0",
-                m.role === "user" ? "max-w-[92%] rounded-[10px] bg-canvas px-3 py-2" : "w-full",
+                m.role === "user" ? "max-w-[92%] rounded-[12px] bg-canvas px-3 py-2 shadow-paper" : "w-full",
               )}
             >
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">

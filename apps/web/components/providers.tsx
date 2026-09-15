@@ -21,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         toastOptions={{
           className: "font-sans",
           classNames: {
-            toast: "border-line bg-panel text-ink shadow-paper",
+            toast: "border-line bg-panel text-ink shadow-float",
             success: "border-success/40 bg-success/10 text-success",
             error: "border-danger/40 bg-danger/10 text-danger",
           },

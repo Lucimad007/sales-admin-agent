@@ -6,23 +6,56 @@
   color-scheme: light;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   min-height: 100%;
-  background: #f6f1e8;
-  color: #1c1915;
+  background-color: #dcc9b0;
+  background-image:
+    radial-gradient(1100px 560px at 50% -12%, #f3e6d4 0%, #dcc9b0 58%),
+    radial-gradient(820px 420px at 100% 110%, rgba(196, 78, 31, 0.1), transparent 55%);
+  color: #16120f;
 }
 
 body {
   font-feature-settings: "ss01" on, "cv11" on;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 120%, rgba(40, 24, 12, 0.1), transparent 52%);
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #e4d9c8 transparent;
+  scrollbar-color: #c3ad91 transparent;
 }
 
 ::selection {
-  background: #b4572a;
-  color: #fffbf5;
+  background: #c44e1f;
+  color: #fff9f0;
+}
+
+@layer components {
+  .ledger-select {
+    @apply h-9 rounded-lg border border-line bg-panel px-3 text-sm text-ink shadow-inset outline-none transition-[border-color,box-shadow] duration-200 ease-ledger focus:border-copper focus:ring-2 focus:ring-copper/25;
+  }
 }

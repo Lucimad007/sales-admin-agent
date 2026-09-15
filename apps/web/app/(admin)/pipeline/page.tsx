@@ -1,20 +1,19 @@
 "use client";
 
-import {
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  closestCorners,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { KANBAN_STATUSES, type KanbanStatus, type ListResponse, type Sale, type SaleStatus } from "@sales/shared";
 import { Card } from "@/components/ui/card";
+import {
+  Kanban,
+  KanbanBoard,
+  KanbanColumn,
+  KanbanColumnContent,
+  KanbanItem,
+  KanbanItemHandle,
+  KanbanOverlay,
+} from "@/components/ui/kanban";
 import { api, apiData, ApiError } from "@/lib/api";
 import { formatMoney, statusLabel } from "@/lib/format";
 import { qk } from "@/lib/query-keys";
@@ -32,12 +31,38 @@ const titleTones: Record<KanbanStatus, string> = {
   completed: "text-success",
 };
 
+function emptyBoard(): Record<KanbanStatus, Sale[]> {
+  return { new: [], in_progress: [], completed: [] };
+}
+
+function toColumns(sales: Sale[]): Record<KanbanStatus, Sale[]> {
+  const next = emptyBoard();
+  for (const sale of sales) {
+    if (sale.status === "cancelled") continue;
+    next[sale.status].push(sale);
+  }
+  return next;
+}
+
 export default function PipelinePage() {
   const qc = useQueryClient();
   const list = useQuery({
     queryKey: qk.sales({ board: true }),
     queryFn: () => api<ListResponse<Sale>>("/api/sales?pageSize=100"),
   });
+
+  const fromServer = useMemo(() => toColumns(list.data?.data ?? []), [list.data?.data]);
+  const [columns, setColumns] = useState<Record<KanbanStatus, Sale[]>>(fromServer);
+
+  useEffect(() => {
+    setColumns(fromServer);
+  }, [fromServer]);
+
+  const saleById = useMemo(() => {
+    const map = new Map<string, Sale>();
+    for (const sale of list.data?.data ?? []) map.set(sale.id, sale);
+    return map;
+  }, [list.data?.data]);
 
   const move = useMutation({
     mutationFn: ({ id, status }: { id: string; status: SaleStatus }) =>
@@ -64,70 +89,79 @@ export default function PipelinePage() {
     },
   });
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
-  const board = (list.data?.data ?? []).filter((s) => s.status !== "cancelled");
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const saleId = String(event.active.id);
-    const overId = event.over?.id ? String(event.over.id) : null;
-    if (!overId) return;
-    const overSale = board.find((s) => s.id === overId);
-    const column = KANBAN_STATUSES.includes(overId as KanbanStatus)
-      ? (overId as KanbanStatus)
-      : (overSale?.status as KanbanStatus | undefined);
-    if (!column) return;
-    const current = board.find((s) => s.id === saleId);
-    if (!current || current.status === column) return;
-    move.mutate({ id: saleId, status: column });
-  };
-
   return (
     <div>
       <h1 className="text-2xl font-medium tracking-tight">Pipeline</h1>
       <p className="mt-1 text-sm text-ink-muted">Cancelled deals stay on the sales list, not this board.</p>
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          {KANBAN_STATUSES.map((status) => {
-            const items = board.filter((s) => s.status === status);
+      <Kanban
+        className="mt-6"
+        value={columns}
+        onValueChange={(next) => setColumns(next as Record<KanbanStatus, Sale[]>)}
+        getItemValue={(item) => item.id}
+        onMove={({ event, activeContainer, overContainer }) => {
+          const saleId = String(event.active.id);
+          if (activeContainer === overContainer) return;
+          if (!KANBAN_STATUSES.includes(overContainer as KanbanStatus)) return;
+          const current = saleById.get(saleId);
+          if (!current || current.status === overContainer) return;
+          move.mutate({ id: saleId, status: overContainer as SaleStatus });
+        }}
+      >
+        <KanbanBoard className="grid-cols-1 lg:grid-cols-3">
+          {KANBAN_STATUSES.map((status) => (
+            <KanbanColumn
+              key={status}
+              value={status}
+              className={cn(
+                "rounded-[12px] border border-line border-t-[3px] bg-panel p-3 shadow-lift",
+                accents[status],
+              )}
+            >
+              <div className="mb-3 flex items-baseline justify-between px-1">
+                <h2 className={cn("text-sm font-medium", titleTones[status])}>{statusLabel(status)}</h2>
+                <span className="font-mono text-xs text-ink-muted">{columns[status].length}</span>
+              </div>
+              <KanbanColumnContent value={status} className="min-h-[240px] gap-2">
+                {columns[status].map((sale) => (
+                  <SaleCard key={sale.id} sale={sale} />
+                ))}
+              </KanbanColumnContent>
+            </KanbanColumn>
+          ))}
+        </KanbanBoard>
+        <KanbanOverlay>
+          {({ value, variant }) => {
+            if (variant !== "item") return null;
+            const sale = saleById.get(String(value));
+            if (!sale) {
+              return <div className="size-full rounded-[10px] bg-panel/50" />;
+            }
             return (
-              <Column key={status} status={status} items={items} />
+              <SaleBody
+                sale={sale}
+                className="cursor-grabbing border-line bg-panel/80 opacity-90 shadow-float"
+              />
             );
-          })}
-        </div>
-      </DndContext>
+          }}
+        </KanbanOverlay>
+      </Kanban>
     </div>
   );
 }
 
-function Column({ status, items }: { status: KanbanStatus; items: Sale[] }) {
-  const { setNodeRef } = useDroppable({ id: status });
+function SaleCard({ sale }: { sale: Sale }) {
   return (
-    <section className={cn("rounded-[10px] border border-line border-t-[3px] bg-panel p-3 shadow-paper", accents[status])}>
-      <div className="mb-3 flex items-baseline justify-between px-1">
-        <h2 className={cn("text-sm font-medium", titleTones[status])}>{statusLabel(status)}</h2>
-        <span className="font-mono text-xs text-ink-muted">{items.length}</span>
-      </div>
-      <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-        <div ref={setNodeRef} className="min-h-[240px] space-y-2">
-          {items.map((sale) => (
-            <SaleCard key={sale.id} sale={sale} />
-          ))}
-        </div>
-      </SortableContext>
-    </section>
+    <KanbanItem value={sale.id}>
+      <KanbanItemHandle>
+        <SaleBody sale={sale} />
+      </KanbanItemHandle>
+    </KanbanItem>
   );
 }
 
-function SaleCard({ sale }: { sale: Sale }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sale.id });
+function SaleBody({ sale, className }: { sale: Sale; className?: string }) {
   return (
-    <Card
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn("cursor-grab p-3 active:cursor-grabbing", isDragging && "opacity-70")}
-      {...attributes}
-      {...listeners}
-    >
+    <Card className={cn("cursor-grab p-3 shadow-paper transition-[box-shadow,transform] duration-200 ease-ledger hover:-translate-y-0.5 hover:shadow-float active:cursor-grabbing", className)}>
       <p className="text-sm">{sale.productName}</p>
       <p className="mt-1 text-xs text-ink-muted">
         {sale.customer ? `${sale.customer.firstName} ${sale.customer.lastName}` : "—"}
