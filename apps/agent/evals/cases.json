@@ -1,0 +1,300 @@
+[
+  {
+    "id": "closed-revenue",
+    "user": "What's our closed revenue?",
+    "expect_tools": ["get_dashboard_stats"],
+    "tools": [
+      {
+        "name": "get_dashboard_stats",
+        "content": "{\"data\":{\"totalCustomers\":12,\"totalSales\":24,\"totalRevenue\":\"18450.00\"}}"
+      }
+    ],
+    "expect_ui": ["KpiStrip"]
+  },
+  {
+    "id": "kpi-then-extra-pipeline-keeps-pipeline-rank",
+    "user": "Revenue only",
+    "expect_tools": ["get_dashboard_stats"],
+    "tools": [
+      {
+        "name": "get_dashboard_stats",
+        "content": "{\"data\":{\"totalCustomers\":12,\"totalSales\":24,\"totalRevenue\":\"18450.00\"}}"
+      },
+      {
+        "name": "get_pipeline",
+        "content": "{\"data\":{\"columns\":[{\"status\":\"new\",\"count\":1,\"total\":\"10.00\"}]}}"
+      }
+    ],
+    "expect_ui": ["PipelineSummary"]
+  },
+  {
+    "id": "pipeline",
+    "user": "Summarize the pipeline",
+    "expect_tools": ["get_pipeline"],
+    "tools": [
+      {
+        "name": "get_pipeline",
+        "content": "{\"data\":{\"columns\":[{\"status\":\"new\",\"count\":5,\"total\":\"100.00\"},{\"status\":\"in_progress\",\"count\":2,\"total\":\"50.00\"},{\"status\":\"completed\",\"count\":3,\"total\":\"80.00\"}]}}"
+      }
+    ],
+    "expect_ui": ["PipelineSummary"]
+  },
+  {
+    "id": "one-customer",
+    "user": "Look up Ali Fatemi",
+    "expect_tools": ["search_customers"],
+    "tools": [
+      {
+        "name": "search_customers",
+        "content": "{\"data\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Ali\",\"lastName\":\"Fatemi\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"x\"}]}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "two-customers-list",
+    "user": "Search Ali",
+    "expect_tools": ["search_customers"],
+    "tools": [
+      {
+        "name": "search_customers",
+        "content": "{\"data\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Ali\",\"lastName\":\"Fatemi\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"x\"},{\"id\":\"22222222-2222-4222-8222-222222222222\",\"firstName\":\"Ali\",\"lastName\":\"Other\",\"email\":\"b@x.co\",\"phone\":\"2\",\"address\":\"y\"}]}"
+      }
+    ],
+    "expect_ui": ["CustomerList"]
+  },
+  {
+    "id": "customer-plus-kpis-dropped",
+    "user": "Find Ali",
+    "expect_tools": ["search_customers"],
+    "tools": [
+      {
+        "name": "search_customers",
+        "content": "{\"data\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Ali\",\"lastName\":\"Fatemi\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"x\"}]}"
+      },
+      {
+        "name": "get_dashboard_stats",
+        "content": "{\"data\":{\"totalCustomers\":13,\"totalSales\":22,\"totalRevenue\":\"1.00\"}}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "two-get-customer-merged",
+    "user": "Find both Alis",
+    "expect_tools": ["search_customers"],
+    "tools": [
+      {
+        "name": "get_customer",
+        "content": "{\"data\":{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Ali\",\"lastName\":\"A\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"x\"}}"
+      },
+      {
+        "name": "get_customer",
+        "content": "{\"data\":{\"id\":\"22222222-2222-4222-8222-222222222222\",\"firstName\":\"Ali\",\"lastName\":\"B\",\"email\":\"b@x.co\",\"phone\":\"2\",\"address\":\"y\"}}"
+      },
+      {
+        "name": "get_pipeline",
+        "content": "{\"data\":{\"columns\":[]}}"
+      }
+    ],
+    "expect_ui": ["CustomerList"]
+  },
+  {
+    "id": "open-deals",
+    "user": "Which deals are in progress?",
+    "expect_tools": ["search_sales"],
+    "tools": [
+      {
+        "name": "search_sales",
+        "content": "{\"data\":[{\"id\":\"s1\",\"productName\":\"Kit\",\"price\":\"10\",\"status\":\"in_progress\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}}]}"
+      }
+    ],
+    "expect_ui": ["SalesTable"]
+  },
+  {
+    "id": "sales-cap-eight",
+    "user": "List sales",
+    "expect_tools": ["search_sales"],
+    "tools": [
+      {
+        "name": "search_sales",
+        "content": "{\"data\":[{\"id\":\"s1\",\"productName\":\"A\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s2\",\"productName\":\"B\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s3\",\"productName\":\"C\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s4\",\"productName\":\"D\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s5\",\"productName\":\"E\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s6\",\"productName\":\"F\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s7\",\"productName\":\"G\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s8\",\"productName\":\"H\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}},{\"id\":\"s9\",\"productName\":\"I\",\"price\":\"1\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}}]}"
+      }
+    ],
+    "expect_ui": ["SalesTable"],
+    "expect_row_cap": 8
+  },
+  {
+    "id": "empty-customer-search",
+    "user": "Find zzzz",
+    "expect_tools": ["search_customers"],
+    "tools": [{ "name": "search_customers", "content": "{\"data\":[]}" }],
+    "expect_ui": []
+  },
+  {
+    "id": "tool-http-error-no-ui",
+    "user": "Dashboard",
+    "expect_tools": ["get_dashboard_stats"],
+    "tools": [{ "name": "get_dashboard_stats", "content": "{\"error\":{\"status\":500,\"message\":\"boom\"}}" }],
+    "expect_ui": []
+  },
+  {
+    "id": "cancelled-write-no-ui",
+    "user": "Create Mira",
+    "expect_tools": ["create_customer"],
+    "tools": [{ "name": "create_customer", "content": "{\"data\":{\"cancelled\":true}}" }],
+    "expect_ui": []
+  },
+  {
+    "id": "created-customer-card",
+    "user": "Create Mira",
+    "expect_tools": ["create_customer"],
+    "tools": [
+      {
+        "name": "create_customer",
+        "content": "{\"data\":{\"id\":\"33333333-3333-4333-8333-333333333333\",\"firstName\":\"Mira\",\"lastName\":\"Sol\",\"email\":\"m@x.co\",\"phone\":\"1\",\"address\":\"x\"}}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "created-sale-table",
+    "user": "Create sale",
+    "expect_tools": ["create_sale"],
+    "tools": [
+      {
+        "name": "create_sale",
+        "content": "{\"data\":{\"id\":\"s9\",\"productName\":\"Kit\",\"price\":\"250\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"Amelia\",\"lastName\":\"Chen\"}}}"
+      }
+    ],
+    "expect_ui": ["SalesTable"]
+  },
+  {
+    "id": "prior-turn-ignored",
+    "user": "Find Ali",
+    "prior": [
+      {
+        "role": "human",
+        "content": "kpis"
+      },
+      {
+        "name": "get_dashboard_stats",
+        "content": "{\"data\":{\"totalCustomers\":1,\"totalSales\":1,\"totalRevenue\":\"1.00\"}}"
+      }
+    ],
+    "expect_tools": ["search_customers"],
+    "tools": [
+      {
+        "name": "search_customers",
+        "content": "{\"data\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Ali\",\"lastName\":\"Fatemi\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"x\"}]}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "thanks-no-tools",
+    "user": "thanks",
+    "expect_tools": [],
+    "tools": [],
+    "expect_ui": []
+  },
+  {
+    "id": "status-move",
+    "user": "Move that deal to completed",
+    "expect_tools": ["update_sale_status"],
+    "tools": [
+      {
+        "name": "update_sale_status",
+        "content": "{\"data\":{\"id\":\"s1\",\"productName\":\"Kit\",\"price\":\"10\",\"status\":\"completed\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}}}"
+      }
+    ],
+    "expect_ui": ["SalesTable"]
+  },
+  {
+    "id": "note-update",
+    "user": "Add a note on the sale",
+    "expect_tools": ["add_sale_note"],
+    "tools": [
+      {
+        "name": "add_sale_note",
+        "content": "{\"data\":{\"id\":\"s1\",\"productName\":\"Kit\",\"price\":\"10\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}}}"
+      }
+    ],
+    "expect_ui": ["SalesTable"]
+  },
+  {
+    "id": "get-customer-by-id",
+    "user": "Open that customer",
+    "expect_tools": ["get_customer"],
+    "tools": [
+      {
+        "name": "get_customer",
+        "content": "{\"data\":{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Amelia\",\"lastName\":\"Chen\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"SF\"}}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "unknown-tool",
+    "user": "??",
+    "expect_tools": [],
+    "tools": [{ "name": "nope", "content": "{\"data\":{}}" }],
+    "expect_ui": []
+  },
+  {
+    "id": "pipeline-beats-kpi-if-only-those-two-wrong-rank",
+    "user": "Pipeline please",
+    "expect_tools": ["get_pipeline"],
+    "tools": [
+      {
+        "name": "get_dashboard_stats",
+        "content": "{\"data\":{\"totalCustomers\":1,\"totalSales\":1,\"totalRevenue\":\"1.00\"}}"
+      },
+      {
+        "name": "get_pipeline",
+        "content": "{\"data\":{\"columns\":[{\"status\":\"new\",\"count\":2,\"total\":\"9.00\"}]}}"
+      }
+    ],
+    "expect_ui": ["PipelineSummary"]
+  },
+  {
+    "id": "sales-beat-pipeline",
+    "user": "Open deals",
+    "expect_tools": ["search_sales"],
+    "tools": [
+      {
+        "name": "search_sales",
+        "content": "{\"data\":[{\"id\":\"s1\",\"productName\":\"Kit\",\"price\":\"10\",\"status\":\"new\",\"createdAt\":\"2026-01-01\",\"customer\":{\"firstName\":\"A\",\"lastName\":\"B\"}}]}"
+      },
+      {
+        "name": "get_pipeline",
+        "content": "{\"data\":{\"columns\":[{\"status\":\"new\",\"count\":1,\"total\":\"10.00\"}]}}"
+      }
+    ],
+    "expect_ui": ["SalesTable"]
+  },
+  {
+    "id": "update-customer-card",
+    "user": "Change her phone",
+    "expect_tools": ["update_customer"],
+    "tools": [
+      {
+        "name": "update_customer",
+        "content": "{\"data\":{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Amelia\",\"lastName\":\"Chen\",\"email\":\"a@x.co\",\"phone\":\"9\",\"address\":\"SF\"}}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  },
+  {
+    "id": "nested-data-customer",
+    "user": "Get Amelia",
+    "expect_tools": ["get_customer"],
+    "tools": [
+      {
+        "name": "get_customer",
+        "content": "{\"id\":\"11111111-1111-4111-8111-111111111111\",\"firstName\":\"Amelia\",\"lastName\":\"Chen\",\"email\":\"a@x.co\",\"phone\":\"1\",\"address\":\"SF\"}"
+      }
+    ],
+    "expect_ui": ["CustomerCard"]
+  }
+]

@@ -16,6 +16,7 @@ from agent.crm import CrmClient
 from agent.graph import compile_graph
 from agent.settings import settings
 from agent.tools import crm_var
+from agent.trace import enable_tracing
 
 graph_app = None
 
@@ -31,6 +32,7 @@ def _db_uri() -> str:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     global graph_app
+    enable_tracing()
     checkpointer: Any = MemorySaver()
     try:
         from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver

@@ -67,6 +67,8 @@ def _list_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def map_tool_result(name: str, payload: Any) -> dict[str, Any] | None:
+    if isinstance(payload, dict) and payload.get("error"):
+        return None
     data = _payload_data(payload)
     if data is None:
         return None

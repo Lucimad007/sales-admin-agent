@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     llm_model: str = "deepseek-v4.1-flash"
     llm_base_url: str = "https://opencode.ai/zen/go/v1"
     api_origin: str = "http://127.0.0.1:3001"
+    langsmith_api_key: str = ""
+    langsmith_project: str = "ledger-tally"
 
     @property
     def llm_api_key(self) -> str:

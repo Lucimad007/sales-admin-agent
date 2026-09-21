@@ -84,3 +84,11 @@ Zod schemas live in `packages/shared`. Python emits the same JSON shapes.
 - Spoken reply is one or two sentences; do not repeat UI fields.
 - Never invent IDs. Search first.
 - If `OPENCODE_GO_API_KEY` is missing, FastAPI `/health` returns `llm: false`; Nest surfaces that to the UI.
+
+## Evals and traces
+
+`apps/agent/evals/cases.json` — 24 frozen turns. `pytest` maps tool JSON → genUI without calling a model.
+
+`tests/test_policy.py` — interrupt before POST, reject does not mutate, Nest 500 becomes `{error}`, invented IDs never hit HTTP.
+
+Optional LangSmith: `LANGSMITH_API_KEY` on agent boot (`agent.trace.enable_tracing`).

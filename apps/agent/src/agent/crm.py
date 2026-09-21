@@ -14,20 +14,36 @@ class CrmClient:
             "Content-Type": "application/json",
         }
 
-    async def get(self, path: str, params: dict[str, Any] | None = None) -> Any:
-        async with httpx.AsyncClient(timeout=20) as client:
-            res = await client.get(f"{self.api_base}{path}", headers=self.headers, params=params)
-            res.raise_for_status()
+    @staticmethod
+    def _parse(res: httpx.Response) -> Any:
+        if res.status_code >= 400:
+            body = (res.text or res.reason_phrase or "request failed")[:800]
+            return {"error": {"status": res.status_code, "message": body}}
+        try:
             return res.json()
+        except ValueError:
+            return {"error": {"status": res.status_code, "message": "invalid json from api"}}
+
+    async def get(self, path: str, params: dict[str, Any] | None = None) -> Any:
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                res = await client.get(f"{self.api_base}{path}", headers=self.headers, params=params)
+                return self._parse(res)
+        except httpx.RequestError as exc:
+            return {"error": {"status": 0, "message": str(exc)}}
 
     async def post(self, path: str, json: dict[str, Any]) -> Any:
-        async with httpx.AsyncClient(timeout=20) as client:
-            res = await client.post(f"{self.api_base}{path}", headers=self.headers, json=json)
-            res.raise_for_status()
-            return res.json()
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                res = await client.post(f"{self.api_base}{path}", headers=self.headers, json=json)
+                return self._parse(res)
+        except httpx.RequestError as exc:
+            return {"error": {"status": 0, "message": str(exc)}}
 
     async def patch(self, path: str, json: dict[str, Any]) -> Any:
-        async with httpx.AsyncClient(timeout=20) as client:
-            res = await client.patch(f"{self.api_base}{path}", headers=self.headers, json=json)
-            res.raise_for_status()
-            return res.json()
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                res = await client.patch(f"{self.api_base}{path}", headers=self.headers, json=json)
+                return self._parse(res)
+        except httpx.RequestError as exc:
+            return {"error": {"status": 0, "message": str(exc)}}

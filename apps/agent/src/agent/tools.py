@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from contextvars import ContextVar
 from typing import Any
+from uuid import UUID
 
 from langchain_core.tools import tool
 from langgraph.types import interrupt
@@ -17,7 +18,31 @@ def current_crm() -> CrmClient:
     return crm_var.get()
 
 
+def refuse_bad_id(value: str, label: str) -> dict[str, Any] | None:
+    try:
+        UUID(str(value))
+    except (ValueError, TypeError, AttributeError):
+        return {
+            "error": {
+                "status": 400,
+                "message": f"invalid {label}; search first, never invent ids",
+            }
+        }
+    return None
+
+
 def _confirm(action: str, args: dict[str, Any], preview: str) -> dict[str, Any]:
+    decision = interrupt(
+        {
+            "action": action,
+            "args": args,
+            "preview": preview,
+            "ui": confirm_part(action, args, preview),
+        }
+    )
+    if isinstance(decision, dict):
+        return decision
+    return {"decision": str(decision)}
     decision = interrupt(
         {
             "action": action,
@@ -46,6 +71,9 @@ async def search_customers(q: str = "") -> dict[str, Any]:
 @tool
 async def get_customer(customer_id: str) -> dict[str, Any]:
     """Fetch one customer by UUID when you already have the id and need the full record. Never loop this over search results."""
+    bad = refuse_bad_id(customer_id, "customer_id")
+    if bad:
+        return bad
     return await current_crm().get(f"/customers/{customer_id}")
 
 
@@ -62,6 +90,8 @@ async def search_sales(q: str = "", status: str | None = None) -> dict[str, Any]
 async def get_pipeline() -> dict[str, Any]:
     """Pipeline columns New / In Progress / Completed with counts and totals. Call only when the user asks about pipeline or stages."""
     payload = await current_crm().get("/sales", params={"pageSize": 100})
+    if isinstance(payload, dict) and payload.get("error"):
+        return payload
     rows = payload.get("data") or []
     columns: dict[str, dict[str, Any]] = {
         "new": {"status": "new", "count": 0, "total": 0.0},
@@ -109,6 +139,9 @@ async def create_customer(
 @tool
 async def update_customer(customer_id: str, patch_json: str) -> dict[str, Any]:
     """Update a customer. patch_json is a JSON object of fields to change."""
+    bad = refuse_bad_id(customer_id, "customer_id")
+    if bad:
+        return bad
     args = {"id": customer_id, **json.loads(patch_json)}
     decision = _confirm("update_customer", args, f"Update customer {customer_id}: {patch_json}")
     if decision.get("decision") != "approve":
@@ -126,6 +159,9 @@ async def create_sale(
     status: str = "new",
 ) -> dict[str, Any]:
     """Create a sale after the user confirms."""
+    bad = refuse_bad_id(customer_id, "customer_id")
+    if bad:
+        return bad
     args = {
         "customerId": customer_id,
         "productName": product_name,
@@ -146,6 +182,9 @@ async def create_sale(
 @tool
 async def update_sale_status(sale_id: str, status: str) -> dict[str, Any]:
     """Move a sale to a new status after confirmation."""
+    bad = refuse_bad_id(sale_id, "sale_id")
+    if bad:
+        return bad
     args = {"id": sale_id, "status": status}
     decision = _confirm("update_sale_status", args, f"Set sale {sale_id} to {status}.")
     if decision.get("decision") != "approve":
@@ -156,6 +195,9 @@ async def update_sale_status(sale_id: str, status: str) -> dict[str, Any]:
 @tool
 async def add_sale_note(sale_id: str, notes: str) -> dict[str, Any]:
     """Replace sale notes after confirmation."""
+    bad = refuse_bad_id(sale_id, "sale_id")
+    if bad:
+        return bad
     args = {"id": sale_id, "notes": notes}
     decision = _confirm("add_sale_note", args, f"Update notes on sale {sale_id}.")
     if decision.get("decision") != "approve":

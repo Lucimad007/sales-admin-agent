@@ -13,6 +13,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from agent.crm import CrmClient
 from agent.settings import settings
 from agent.tools import TOOLS, crm_var
+from agent.trace import enable_tracing
 from agent.ui import parts_for_turn
 
 
@@ -130,5 +131,9 @@ def build_graph():
     return graph
 
 
+from agent.trace import enable_tracing
+
+
 def compile_graph(checkpointer: Any):
+    enable_tracing()
     return build_graph().compile(checkpointer=checkpointer)
