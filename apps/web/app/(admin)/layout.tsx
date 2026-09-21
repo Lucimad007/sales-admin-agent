@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [me.error, router]);
 
   if (me.isLoading) {
-    return <div className="flex min-h-[100dvh] items-center justify-center text-sm text-ink-muted">Loading ledger…</div>;
+    return <div className="flex min-h-[100dvh] items-center justify-center text-sm text-ink-muted">Loading desk…</div>;
   }
   if (!me.data) {
     return null;

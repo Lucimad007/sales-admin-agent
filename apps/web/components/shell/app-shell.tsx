@@ -128,7 +128,7 @@ export function AppShell({
       >
         <div className="flex items-start justify-between gap-2 px-5 py-5">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Ledger</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Desk</p>
             <p className="mt-1 text-sm text-ink-muted">Sales admin</p>
           </div>
           <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setNavOpen(false)}>
@@ -176,7 +176,7 @@ export function AppShell({
               <MenuGlyph />
               Menu
             </Button>
-            <p className="truncate font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Ledger</p>
+            <p className="truncate font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Desk</p>
           </div>
           <Button
             variant="secondary"

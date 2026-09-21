@@ -27,7 +27,7 @@ class AgentState(TypedDict):
     memories: list[dict[str, str]]
 
 
-SYSTEM = """You are Tally, Ledger's internal sales desk assistant.
+SYSTEM = """You are Tally, the assistant on this sales desk.
 
 Tools return live CRM data. Never invent customer or sale IDs.
 
@@ -45,7 +45,7 @@ Known facts about this seller:
 
 
 def _llm(session_id: str | None = None) -> ChatOpenAI:
-    headers = {"User-Agent": "ledger-tally/1.0"}
+    headers = {"User-Agent": "desk-tally/1.0"}
     if session_id:
         headers["x-opencode-session"] = session_id
     return ChatOpenAI(

@@ -47,11 +47,11 @@ Tight tables (row py ~10px). Sidebar ~232px on desktop; a Menu drawer on small s
 - Toasts: success green wash, error red wash
 - KPI: label muted, value IBM Plex Sans 28px, not a rainbow icon grid; revenue card gets a copper top edge
 - Kanban column: panel, status color as 3px top edge; count badge in the header; cards show Deal + status. On small screens, one stage at a time with a Move-to control — not a squeezed three-column board.
-- Tally: copper 3px left rule on the rail; copper 2px left rule on assistant messages; no purple glow, no sparkle spam. GenUI widgets reuse Ledger cards, badges, and KPI type — not a second visual language.
+- Tally: copper 3px left rule on the rail; copper 2px left rule on assistant messages; no purple glow, no sparkle spam. GenUI widgets reuse Desk cards, badges, and KPI type — not a second visual language.
 
 ## Layout
 
-Left: wordmark “Ledger” + nav (Dashboard, Customers, Sales, Pipeline). On small screens the nav is behind Menu.  
+Left: wordmark “Desk” + nav (Dashboard, Customers, Sales, Pipeline). On small screens the nav is behind Menu.  
 Main: page title, one-line description, actions aligned right (stack on narrow viewports).  
 Right: Tally. On small screens Tally is a full-screen overlay, closed by default.
 

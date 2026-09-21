@@ -22,7 +22,7 @@ type Msg = {
 
 const WELCOME_ID = "tally-welcome";
 
-const WELCOME_TEXT = `I'm **Tally**, your sales desk on this ledger.
+const WELCOME_TEXT = `I'm **Tally**. I work this sales desk.
 
 I can look up customers, pipeline, and closed revenue from live data. If you ask me to change a record, I'll show an Approve step first.
 

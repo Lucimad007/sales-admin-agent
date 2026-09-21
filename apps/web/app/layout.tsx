@@ -15,7 +15,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "Ledger",
+  title: "Desk",
   description: "Sales admin panel",
 };
 

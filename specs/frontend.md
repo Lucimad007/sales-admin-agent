@@ -31,7 +31,7 @@ Mutations invalidate the matching lists plus `dashboard`. Kanban status patch in
 
 ## Kanban
 
-Columns: New, In Progress, Completed. Desktop uses the `Kanban` primitive (`@dnd-kit`) with drag between columns. Below `lg`, a stage tab list shows one column at a time and cards move via a select. Cards show Ledger `Badge`s (Deal + status). Optimistic status update; rollback on error. Cancelled is hidden here. Column order is fixed.
+Columns: New, In Progress, Completed. Desktop uses the `Kanban` primitive (`@dnd-kit`) with drag between columns. Below `lg`, a stage tab list shows one column at a time and cards move via a select. Cards show Desk `Badge`s (Deal + status). Optimistic status update; rollback on error. Cancelled is hidden here. Column order is fixed.
 
 ## Forms
 
@@ -41,7 +41,7 @@ Customer and sale create/edit in dialogs on list pages; detail pages allow edit 
 
 - Persistent thread per user (server-side `thread:{userId}`)
 - Stream tokens into the last assistant message
-- Render `ui` parts with a closed registry (OpenUI-style library, not free-form model HTML). One data widget per turn. Widgets match Ledger: KPI trio, identity customer cards, headed lists, pipeline bars.
+- Render `ui` parts with a closed registry (OpenUI-style library, not free-form model HTML). One data widget per turn. Widgets match Desk: KPI trio, identity customer cards, headed lists, pipeline bars.
 - `interrupt` shows `ConfirmAction`; Approve calls resume `approve`, Reject calls `reject`
 - Health query: if `llm` is false, show setup empty state instead of the composer being “broken”
 - First open seeds a Tally welcome message plus clickable “Try asking” prompts (revenue, pipeline, customers, open deals). ⌘K focuses the composer.

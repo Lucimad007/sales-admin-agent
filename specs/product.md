@@ -41,7 +41,7 @@ Total revenue counts only sales with status `completed`.
 
 ## Tally
 
-Tally is Ledger's sales desk assistant. It answers questions, renders structured UI (tables, cards, KPIs), remembers facts across turns, and can mutate CRM data after the user confirms.
+Tally is the sales-desk assistant. It answers questions, renders structured UI (tables, cards, KPIs), remembers facts across turns, and can mutate CRM data after the user confirms.
 
 ## Acceptance
 

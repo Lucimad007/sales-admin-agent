@@ -1,4 +1,4 @@
-# Ledger
+# Desk
 
 [![Next.js](https://img.shields.io/badge/Next.js_15-16120F?style=flat-square&logo=nextdotjs&logoColor=DCC9B0)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React_19-16120F?style=flat-square&logo=react&logoColor=DCC9B0)](https://react.dev)
@@ -101,7 +101,7 @@ pnpm dev
 
 [http://localhost:3000](http://localhost:3000) — `leo.a@example.org` / `demo1234`
 
-Tally needs `OPENCODE_GO_API_KEY`. The CRM works without it. Optional traces: `LANGSMITH_API_KEY`, project `ledger-tally`.
+Tally needs `OPENCODE_GO_API_KEY`. The CRM works without it. Optional traces: `LANGSMITH_API_KEY`, project `desk-tally`.
 
 | | |
 | --- | --- |

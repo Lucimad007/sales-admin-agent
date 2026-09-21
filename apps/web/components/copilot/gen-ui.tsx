@@ -89,7 +89,7 @@ export function GenUi({
               </Link>
               <Badge variant="copper">Customer</Badge>
             </div>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted">Ledger record</p>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted">On file</p>
           </div>
         </div>
         <dl className="border-t border-line">

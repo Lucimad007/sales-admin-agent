@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_12%,rgba(196,78,31,0.22),transparent_52%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_110%,rgba(40,24,12,0.16),transparent_55%)]" />
       <div className="relative w-full max-w-[420px] rounded-[14px] border border-line bg-panel p-6 shadow-float ring-1 ring-white/40 sm:p-8">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Ledger</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Desk</p>
         <h1 className="mt-3 text-2xl font-medium tracking-tight">Sign in</h1>
         <p className="mt-1 text-sm text-ink-muted">Sales admin for the book of business.</p>
         <form

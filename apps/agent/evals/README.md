@@ -12,4 +12,4 @@ That locks:
 
 ## LangSmith
 
-Set `LANGSMITH_API_KEY` (or `LANGCHAIN_API_KEY`) in `.env`. On agent boot, traces go to project `ledger-tally` (`LANGCHAIN_TRACING_V2=true`).
+Set `LANGSMITH_API_KEY` (or `LANGCHAIN_API_KEY`) in `.env`. On agent boot, traces go to project `desk-tally` (`LANGCHAIN_TRACING_V2=true`).
