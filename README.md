@@ -1,79 +1,90 @@
 # Ledger
 
-Internal **sales admin** (customers, deals, pipeline) plus **Tally** — a LangGraph sales desk that answers from live CRM data and renders **generative UI**, not markdown dumps.
+[![Next.js](https://img.shields.io/badge/Next.js_15-16120F?style=flat-square&logo=nextdotjs&logoColor=DCC9B0)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React_19-16120F?style=flat-square&logo=react&logoColor=DCC9B0)](https://react.dev)
+[![NestJS](https://img.shields.io/badge/NestJS-16120F?style=flat-square&logo=nestjs&logoColor=DCC9B0)](https://nestjs.com)
+[![PostgreSQL](https://img.shields.io/badge/Postgres_16-16120F?style=flat-square&logo=postgresql&logoColor=DCC9B0)](https://www.postgresql.org)
+[![Drizzle](https://img.shields.io/badge/Drizzle-16120F?style=flat-square&logo=drizzle&logoColor=DCC9B0)](https://orm.drizzle.team)
+[![LangGraph](https://img.shields.io/badge/LangGraph-C44E1F?style=flat-square)](https://langchain-ai.github.io/langgraph/)
+[![Python](https://img.shields.io/badge/Python_3.12-16120F?style=flat-square&logo=python&logoColor=DCC9B0)](https://www.python.org)
+[![pnpm](https://img.shields.io/badge/pnpm_%2B_Turbo-16120F?style=flat-square&logo=pnpm&logoColor=DCC9B0)](https://pnpm.io)
+[![License](https://img.shields.io/badge/license-MIT-C44E1F?style=flat-square)](./LICENSE)
 
-Take-home built as a real product: typed contracts, Nest-owned invariants, first-party auth, HITL writes.
+Sales admin for one book of business, plus **Tally** — a LangGraph desk that reads live CRM data and answers with **one UI widget**, not a markdown dump.
 
-**Example — Tally will not write until you Approve.** LangGraph `interrupt()`. Nest is not called yet.
+Writes do not touch Nest until you press **Approve**.
 
-![Approve create customer](docs/screenshots/tally-approve-customer.png)
+![Dashboard](docs/screenshots/dashboard.png)
 
-![Approve create sale](docs/screenshots/tally-approve-sale.png)
+## Ask Tally
+
+![Question to one widget](docs/readme/ask-tally.png)
+
+| You say | Tally calls | You see |
+| --- | --- | --- |
+| What's our closed revenue? | `get_dashboard_stats` | KPI strip. Revenue is **completed sales only**. |
+| Look up Ali Fatemi | `search_customers` | One `CustomerCard`, or a `CustomerList` if several match. |
+| Pipeline by stage | `get_pipeline` | `PipelineSummary` — New, In Progress, Completed. |
+| Which deals are in progress? | `search_sales` | `SalesTable`. |
+| Create a sale for Amelia Chen, Hire demo kit, $250 | `search_customers`, then `create_sale` | **Needs approval.** Reject writes nothing. |
+
+Spoken reply stays one sentence. The widget holds the record.
+
+![Approve a new customer](docs/screenshots/tally-approve-customer.png)
+
+![Approve a new sale](docs/screenshots/tally-approve-sale.png)
 
 ## Architecture
 
-![Runtime architecture](./architecture.png)
+![Runtime](docs/readme/architecture.png)
 
-Browser talks only to Next (`:3000`). `/api/*` **rewrites** to Nest (`:3001`) so the session cookie is first-party. Tally (`:8100`) is never called from the browser.
+The browser only talks to Next on `:3000`. `/api/*` rewrites to Nest on `:3001`, so the JWT cookie is first-party. Tally (`:8100`) is never a public origin. Its tools call Nest HTTP. The graph does not open CRM SQL. Checkpoints live in Postgres schema `langgraph`.
 
-![pnpm Turborepo map](./monorepo.png)
+![Trust boundary](docs/readme/trust.png)
 
-| Path | Role |
+| Path | Owns |
 | --- | --- |
-| `apps/web` | UI |
-| `apps/api` | REST + agent proxy |
-| `apps/agent` | LangGraph |
-| `packages/db` | schema, migrations, seed |
-| `packages/shared` | Zod shared by web + api |
+| `apps/web` | Next.js UI, TanStack Query |
+| `apps/api` | Nest REST, Zod, auth, agent proxy |
+| `apps/agent` | FastAPI + LangGraph |
+| `packages/db` | Drizzle schema, migrations, seed |
+| `packages/shared` | Zod contracts for web and API |
 
-![Tally trust boundary](./tally-boundary.png)
+Deeper notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions.md](./specs/decisions.md) · [specs/agent.md](./specs/agent.md)
 
-1. `POST /api/agent/chat` with cookie  
-2. Nest verifies JWT, proxies **SSE** with `AGENT_INTERNAL_TOKEN`  
-3. Tools call Nest HTTP (`X-Acting-User-Id`) — **no CRM SQL in the graph**  
-4. Writes `interrupt()` until Approve  
+## Stack
 
-![GenUI catalog](./genui-catalog.png)
+![Stack](docs/readme/stack.png)
 
-Closed catalog, **one data widget per turn**: `KpiStrip` · `CustomerCard` · `CustomerList` · `SalesTable` · `PipelineSummary` · `ConfirmAction`
-
-Full notes: [specs/architecture.md](./specs/architecture.md) · [specs/decisions.md](./specs/decisions.md)
-
-## Keywords
-
-`TypeScript` · `React` · `Next.js 15` · `NestJS` · `Zod` · `Drizzle ORM` · `PostgreSQL` · `TanStack Query` · `Tailwind CSS` · `pnpm` · `Turborepo` · `Python` · `FastAPI` · `LangGraph` · `LangChain` · `generative UI` · `SSE` · `httpOnly JWT` · `human-in-the-loop` · `Kanban` · `dnd-kit`
-
-## Tech stack
-
-| Layer | |
+| | |
 | --- | --- |
-| Web | Next.js App Router, React 19, TanStack Query, Tailwind, shadcn primitives restyled |
-| API | NestJS, Zod DTOs, JWT in httpOnly cookie |
-| Data | Postgres 16, Drizzle (`numeric` prices as strings) |
-| Agent | FastAPI + LangGraph, DeepSeek via OpenCode Go |
+| UI | Next.js 15, React 19, Tailwind, restyled shadcn primitives, dnd-kit Kanban |
+| API | NestJS, Zod DTOs, httpOnly JWT |
+| Data | Postgres 16, Drizzle, `numeric` prices as strings |
+| Agent | FastAPI, LangGraph, DeepSeek via OpenCode Go, SSE |
 | Repo | pnpm workspaces, Turborepo |
 
 ## Product
 
-![Dashboard with Tally](docs/screenshots/dashboard.png)
+![Sign in](docs/screenshots/login.png)
 
-![Login](docs/screenshots/login.png)
+![Pipeline](docs/screenshots/pipeline.png)
 
-![Pipeline Kanban](docs/screenshots/pipeline.png)
+![Customers and a Tally card](docs/screenshots/tally.png)
 
-![Customers + Tally genUI](docs/screenshots/tally.png)
+- Customers and sales: search, create, edit, delete
+- Pipeline: drag on desktop; one stage + Move-to on a phone. Cancelled stays off the board
+- Tally: tools, Postgres checkpointer, long-term `agent_memories`, closed genUI catalog
 
-- Dashboard KPIs; **revenue = completed only**  
-- Customers / sales CRUD  
-- Pipeline: drag on desktop, stage + Move-to on mobile; **cancelled off the board**  
-- Tally: tools, Postgres checkpointer, long-term `agent_memories`
+`KpiStrip` · `CustomerCard` · `CustomerList` · `SalesTable` · `PipelineSummary` · `ConfirmAction`
 
-## Decisions I would defend in interview
+## What I would defend
 
-- Cookie JWT + rewrite, not tokens in `localStorage`  
-- Invariants in Nest services; graph routes and renders  
-- HITL for mutations (`interrupt`)  
-- Closed genUI library (not free-form model HTML)  
+- Cookie + same-origin rewrite, not a token in `localStorage`
+- CRM rules in Nest services. The graph routes and renders
+- `interrupt()` before every write
+- Closed widgets. The model does not emit HTML
+- Frozen evals. CI does not call the model
 
 ## Run
 
@@ -90,13 +101,17 @@ pnpm dev
 
 [http://localhost:3000](http://localhost:3000) — `leo.a@example.org` / `demo1234`
 
-Tally needs `OPENCODE_GO_API_KEY`. CRUD works without it.
+Tally needs `OPENCODE_GO_API_KEY`. The CRM works without it. Optional traces: `LANGSMITH_API_KEY`, project `ledger-tally`.
 
 | | |
 | --- | --- |
-| `pnpm test` | API + agent |
+| `pnpm test` | API e2e (needs the database) + agent evals |
 | `pnpm lint` | typecheck |
+
+## Evals
+
+`apps/agent/evals/cases.json` — frozen turns. Pytest checks the widget, not the model. Policy tests: interrupt before POST, reject skips the mutation, HTTP 500 stays an error dict, invented ids never hit Nest.
 
 ## Built with
 
-Cursor for scaffolding and iteration. I owned auth boundary, revenue definition, Kanban rules, tool HTTP, genUI discipline, and the Ledger visual system.
+Cursor for scaffolding. I set the auth boundary, the revenue rule, Kanban scope, tool HTTP, one-widget genUI, HITL, and the eval suite.
